@@ -1,0 +1,2421 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FMSTORE — متجر الكتب الرقمية والطلب المباشر عبر إنستغرام</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Cairo:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            serif: ['Amiri', 'Georgia', 'serif'],
+            sans: ['Cairo', 'system-ui', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          },
+          colors: {
+            ivory: {
+              50: '#FDFCFA',
+              100: '#FAF7F2',
+              200: '#F2ECE1',
+              300: '#E5DCCB',
+            },
+            ink: {
+              900: '#14181F',
+              800: '#1E242E',
+              700: '#333C4A',
+              500: '#647082',
+            },
+            emerald: {
+              800: '#164E3F',
+              700: '#1D6350',
+              600: '#247A63',
+              50: '#ECF7F3',
+            },
+            amber: {
+              600: '#B4691E',
+              500: '#D9822B',
+              100: '#FDF3E6',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      background-color: #FAF7F2;
+      color: #14181F;
+      font-family: 'Cairo', sans-serif;
+      overflow-x: hidden;
+    }
+
+    /* Realistic 3D Book Spine & Cover Effects (RTL Adapted) */
+    .book-cover-wrapper {
+      perspective: 1000px;
+    }
+    .book-cover {
+      position: relative;
+      transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.35s ease;
+      box-shadow:
+        1px 0 2px rgba(255,255,255,0.4) inset,
+        -4px 0 10px rgba(0,0,0,0.18),
+        0 14px 28px -8px rgba(20, 24, 31, 0.25);
+    }
+    .book-card:hover .book-cover {
+      transform: translateY(-6px) rotateY(6deg);
+      box-shadow:
+        1px 0 2px rgba(255,255,255,0.5) inset,
+        -8px 6px 16px rgba(0,0,0,0.22),
+        0 20px 34px -10px rgba(20, 24, 31, 0.32);
+    }
+    .book-spine-crease {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      right: 0;
+      width: 14px;
+      background: linear-gradient(270deg,
+        rgba(255,255,255,0.28) 0%,
+        rgba(0,0,0,0.22) 25%,
+        rgba(255,255,255,0.12) 55%,
+        rgba(0,0,0,0.12) 85%,
+        transparent 100%);
+      pointer-events: none;
+      z-index: 10;
+    }
+
+    ::-webkit-scrollbar {
+      width: 7px;
+      height: 7px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #F2ECE1;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #C9BFA9;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #A99E86;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-fade-in {
+      animation: fadeIn 0.28s ease-out forwards;
+    }
+
+    @keyframes slideInLeft {
+      from { transform: translateX(-100%); }
+      to { transform: translateX(0); }
+    }
+    .animate-slide-left {
+      animation: slideInLeft 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col selection:bg-emerald-800 selection:text-white">
+
+  <!-- TOP ANNOUNCEMENT & INSTAGRAM ORDER WORKFLOW BAR -->
+  <div class="bg-ink-900 text-ivory-100 text-xs py-2 px-4 border-b border-ink-800">
+    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-2">
+      <div class="flex items-center gap-2">
+        <span class="inline-flex items-center gap-1.5 text-emerald-400 font-semibold">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+          تصفح آمن • نسخ فوري لرابط السلة والطلب عبر إنستغرام
+        </span>
+        <span class="hidden sm:inline text-ink-500">•</span>
+        <span class="hidden sm:inline text-ivory-200">نسخ رقمية أصلية بصيغ EPUB و PDF وكتب صوتية</span>
+      </div>
+      <div class="flex items-center gap-3">
+        <span class="text-amber-400 font-medium">استخدم كود <code class="bg-ink-800 px-1.5 py-0.5 rounded font-mono text-amber-300">WELCOME20</code> لخصم 20% على سلتك</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- INCOMING SHARED CART BANNER (VISIBLE WHEN OPENING A ?cart=... URL) -->
+  <div id="shared-cart-banner" class="hidden bg-gradient-to-l from-emerald-800 via-emerald-700 to-ink-900 text-white border-b border-emerald-600 shadow-md">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+      <div class="flex items-center gap-3">
+        <span class="w-9 h-9 rounded-full bg-white/15 flex items-center justify-center text-lg shrink-0">📦</span>
+        <div>
+          <p class="font-bold text-sm">تم استيراد سلة طلب مشاركة عبر الرابط!</p>
+          <p id="shared-cart-summary-text" class="text-xs text-emerald-100">جاري تحميل بيانات الزبون والكتب...</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-2 self-end sm:self-auto">
+        <button
+          onclick="openIncomingOrderModal()"
+          class="px-3.5 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-ink-900 font-bold text-xs shadow-xs transition"
+        >
+          عرض وتثبيت الطلب (للمالك)
+        </button>
+        <button
+          onclick="dismissSharedCartBanner()"
+          class="px-2.5 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white text-xs transition"
+        >
+          إغلاق
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN NAVIGATION HEADER -->
+  <header class="sticky top-0 z-30 bg-ivory-50/95 backdrop-blur-md border-b border-ivory-300">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16 md:h-20 gap-3">
+        
+        <!-- Brand Logo -->
+        <div class="flex items-center gap-3 cursor-pointer shrink-0" onclick="switchView('storefront')">
+          <div class="w-10 h-10 rounded-xl bg-emerald-800 text-ivory-50 flex items-center justify-center shadow-sm">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+            </svg>
+          </div>
+          <div>
+            <span class="font-serif text-2xl font-bold tracking-tight text-ink-900 block leading-none" dir="ltr">FMSTORE</span>
+            <span class="text-[11px] text-ink-500 font-semibold">دار النشر والكتب الرقمية</span>
+          </div>
+        </div>
+
+        <!-- Search Input (Storefront Mode) -->
+        <div id="header-search-container" class="hidden md:flex flex-1 max-w-md mx-3">
+          <div class="relative w-full">
+            <input
+              type="text"
+              id="search-input"
+              oninput="handleSearch(this.value)"
+              placeholder="ابحث عن عنوان كتاب، مؤلف، أو تصنيف..."
+              class="w-full pr-10 pl-4 py-2 bg-ivory-100 border border-ivory-300 rounded-full text-sm text-ink-900 placeholder-ink-500 focus:outline-none focus:ring-2 focus:ring-emerald-700 focus:bg-white transition"
+            />
+            <svg class="w-4 h-4 text-ink-500 absolute right-3.5 top-2.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+            </svg>
+          </div>
+        </div>
+
+        <!-- Mode Switcher, Customer Login & Cart Actions -->
+        <div class="flex items-center gap-2 sm:gap-2.5">
+          <!-- View Toggle Pill -->
+          <div class="bg-ivory-200 p-1 rounded-full border border-ivory-300 flex items-center text-xs font-semibold">
+            <button
+              id="btn-view-storefront"
+              onclick="switchView('storefront')"
+              class="px-3 py-1.5 rounded-full bg-white text-ink-900 shadow-sm transition flex items-center gap-1.5"
+            >
+              <svg class="w-3.5 h-3.5 text-emerald-700" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
+              <span>المتجر</span>
+            </button>
+            <button
+              id="btn-view-admin"
+              onclick="switchView('admin')"
+              class="px-3 py-1.5 rounded-full text-ink-700 hover:text-ink-900 transition flex items-center gap-1.5"
+            >
+              <svg class="w-3.5 h-3.5 text-amber-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+              <span>لوحة المالك</span>
+            </button>
+          </div>
+
+          <!-- Customer Account / Login Button -->
+          <button
+            id="header-user-btn"
+            onclick="openLoginModal()"
+            class="px-3 py-2 rounded-full bg-ivory-100 hover:bg-ivory-200 border border-ivory-300 text-ink-800 text-xs font-semibold transition flex items-center gap-1.5"
+          >
+            <svg class="w-4 h-4 text-emerald-700" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+            </svg>
+            <span id="header-user-label" class="max-w-[90px] truncate">تسجيل الدخول</span>
+          </button>
+
+          <!-- Shopping Cart Button -->
+          <button
+            onclick="toggleCartDrawer(true)"
+            class="relative flex items-center gap-2 px-3.5 py-2 rounded-full bg-emerald-800 hover:bg-emerald-700 text-white font-semibold text-xs sm:text-sm shadow-sm transition"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
+            </svg>
+            <span class="hidden sm:inline">السلة</span>
+            <span id="cart-count-badge" class="bg-amber-500 text-ink-900 font-bold text-xs px-1.5 py-0.2 rounded-full">0</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Mobile Search Bar -->
+      <div id="mobile-search-container" class="md:hidden pb-3">
+        <div class="relative w-full">
+          <input
+            type="text"
+            id="mobile-search-input"
+            oninput="handleSearch(this.value)"
+            placeholder="ابحث عن كتاب أو مؤلف..."
+            class="w-full pr-9 pl-4 py-2 bg-ivory-100 border border-ivory-300 rounded-full text-sm text-ink-900 placeholder-ink-500 focus:outline-none focus:ring-2 focus:ring-emerald-700"
+          />
+          <svg class="w-4 h-4 text-ink-500 absolute right-3 top-2.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ===================================================================== -->
+  <!-- VIEW 1: CUSTOMER STOREFRONT (واجهة المتجر)                            -->
+  <!-- ===================================================================== -->
+  <main id="view-storefront" class="flex-1">
+    
+    <!-- HERO SECTION: Flagship Release -->
+    <section class="relative bg-gradient-to-bl from-ivory-100 via-ivory-50 to-emerald-50/60 border-b border-ivory-300 overflow-hidden">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 md:py-16">
+        <div id="hero-featured-container" class="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
+          <!-- Populated dynamically -->
+        </div>
+      </div>
+    </section>
+
+    <!-- HOW INSTAGRAM ORDERING WORKS STRIP -->
+    <section class="bg-white border-b border-ivory-300 py-5">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs sm:text-sm">
+          <div class="flex items-center gap-3 p-2.5 rounded-xl bg-ivory-50 border border-ivory-200">
+            <span class="w-7 h-7 rounded-full bg-emerald-800 text-white font-bold flex items-center justify-center shrink-0">1</span>
+            <span><strong>سجّل دخولك واختر كتبك:</strong> أضف الإصدارات التي تريدها إلى سلة القراءة.</span>
+          </div>
+          <div class="flex items-center gap-3 p-2.5 rounded-xl bg-ivory-50 border border-ivory-200">
+            <span class="w-7 h-7 rounded-full bg-emerald-800 text-white font-bold flex items-center justify-center shrink-0">2</span>
+            <span><strong>انسخ رابط السلة:</strong> اضغط على زر نسخ السلة أو الإرسال المباشر لإنستغرام.</span>
+          </div>
+          <div class="flex items-center gap-3 p-2.5 rounded-xl bg-ivory-50 border border-ivory-200">
+            <span class="w-7 h-7 rounded-full bg-emerald-800 text-white font-bold flex items-center justify-center shrink-0">3</span>
+            <span><strong>تثبيت واستلام فوري:</strong> نؤكد طلبك في المحادثة ونرسل لك نسخ الكتب فوراً.</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CATALOG FILTER & SORT BAR -->
+    <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-10 pb-16">
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-ivory-300">
+        <!-- Category Pills -->
+        <div id="category-pills" class="flex items-center gap-2 overflow-x-auto pb-2 md:pb-0">
+          <!-- Populated dynamically -->
+        </div>
+
+        <!-- Sort & Count -->
+        <div class="flex items-center justify-between md:justify-end gap-4">
+          <span id="catalog-count" class="text-sm text-ink-500 font-semibold">عرض 6 إصدارات</span>
+          <select
+            id="sort-select"
+            onchange="handleSort(this.value)"
+            class="bg-white border border-ivory-300 rounded-lg px-3 py-2 text-sm text-ink-800 focus:outline-none focus:ring-2 focus:ring-emerald-700"
+          >
+            <option value="featured">الإصدارات المميزة</option>
+            <option value="price-asc">السعر: من الأقل للأعلى</option>
+            <option value="price-desc">السعر: من الأعلى للأقل</option>
+            <option value="rating">الأعلى تقييماً</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- BOOK GRID -->
+      <div id="book-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 mt-8">
+        <!-- Book cards injected here -->
+      </div>
+    </section>
+  </main>
+
+  <!-- ===================================================================== -->
+  <!-- VIEW 2: OWNER ADMIN DASHBOARD (لوحة تحكم المالك)                      -->
+  <!-- ===================================================================== -->
+  <main id="view-admin" class="hidden flex-1 bg-ivory-100 pb-16">
+    <div class="bg-ink-900 text-ivory-50 py-8 border-b border-ink-800">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <div class="flex items-center gap-2 text-emerald-400 text-xs font-semibold mb-1">
+            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+            مركز تحكم المالك • إدارة الكتب، الأسعار وطلبات إنستغرام
+          </div>
+          <h1 class="font-serif text-3xl font-bold">لوحة إدارة المتجر والطلبات</h1>
+        </div>
+        <div class="flex flex-wrap items-center gap-3">
+          <button
+            onclick="exportUpdatedStoreHTML()"
+            class="px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-ink-900 font-bold text-sm shadow-sm transition flex items-center gap-2"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+            تحميل ملف الموقع المحدّث (index.html)
+          </button>
+          <button
+            onclick="openBookEditorModal()"
+            class="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-sm shadow-sm transition flex items-center gap-2"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+            إضافة كتاب رقمي جديد
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8 space-y-8">
+      
+      <!-- PUBLISH & EXPORT UPDATED SITE BANNER -->
+      <div class="bg-gradient-to-l from-emerald-900 via-emerald-800 to-ink-900 text-white rounded-2xl border border-emerald-600/50 p-6 shadow-md flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+        <div class="space-y-1.5 max-w-2xl">
+          <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-amber-500/20 border border-amber-400/40 text-amber-300 text-xs font-bold">
+            <span>🚀 نشر التعديلات لجميع الزبائن</span>
+          </div>
+          <h2 class="font-serif text-2xl font-bold text-white">تصدير نسخة الموقع المحدّثة للرفع المباشر</h2>
+          <p class="text-xs sm:text-sm text-emerald-100 leading-relaxed">
+            بعد إضافة الكتب أو تعديل الأسعار وحساب إنستغرام من لوحة التحكم، اضغط على زر التحميل للحصول على ملف <code class="bg-black/30 px-1.5 py-0.5 rounded font-mono text-amber-300">index.html</code> جاهز يحتوي على جميع تعديلاتك، ثم ارفعه إلى استضافتك (Netlify أو PythonAnywhere) ليظهر للزبائن فوراً.
+          </p>
+        </div>
+        <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 shrink-0">
+          <button
+            onclick="exportUpdatedStoreHTML()"
+            class="px-5 py-3.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-ink-900 font-extrabold text-sm shadow-lg transition flex items-center justify-center gap-2"
+          >
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+            <span>تحميل ملف الموقع المحدّث (index.html)</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- KPI METRIC CARDS -->
+      <div id="admin-kpi-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        <!-- Populated dynamically -->
+      </div>
+
+      <!-- INSTAGRAM STORE CONFIG & REVENUE CHART -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        
+        <!-- Instagram DM Settings Card -->
+        <div class="lg:col-span-5 bg-white rounded-2xl border border-ivory-300 p-6 shadow-sm flex flex-col justify-between">
+          <div>
+            <div class="flex items-center gap-2 text-amber-600 text-xs font-bold mb-1">
+              <span>إعدادات استقبال الطلبات</span>
+            </div>
+            <h2 class="font-serif text-2xl font-bold text-ink-900 mb-1">حساب إنستغرام المتجر</h2>
+            <p class="text-xs text-ink-500 mb-5">عندما يضغط الزبون على "إرسال الطلب عبر إنستغرام"، سيتم توجيهه تلقائياً إلى محادثة هذا الحساب مع نسخ رابط سلته.</p>
+
+            <div class="space-y-4">
+              <div>
+                <label class="block text-xs font-bold text-ink-700 mb-1">اسم مستخدم إنستغرام الخاص بمتجرك</label>
+                <div class="flex gap-2">
+                  <div class="relative flex-1">
+                    <span class="absolute left-3 top-2 text-ink-500 font-mono text-sm">@</span>
+                    <input
+                      type="text"
+                      id="admin-instagram-input"
+                      dir="ltr"
+                      placeholder="fmstore"
+                      class="w-full pl-8 pr-3 py-2 bg-ivory-50 border border-ivory-300 rounded-xl text-sm font-mono text-ink-900 focus:outline-none focus:ring-2 focus:ring-emerald-700"
+                    />
+                  </div>
+                  <button
+                    onclick="saveInstagramUsername()"
+                    class="px-4 py-2 rounded-xl bg-ink-900 hover:bg-ink-800 text-white text-xs font-bold transition"
+                  >
+                    حفظ
+                  </button>
+                </div>
+                <p class="text-[11px] text-emerald-700 mt-1.5 font-mono" dir="ltr" id="admin-instagram-preview">https://ig.me/m/fmstore</p>
+              </div>
+
+              <div class="flex items-center justify-between py-2 border-t border-ivory-200">
+                <div>
+                  <p class="text-sm font-bold text-ink-900">تفعيل كود الخصم WELCOME20</p>
+                  <p class="text-xs text-ink-500">يمنح الزبون خصم 20% داخل السلة</p>
+                </div>
+                <input type="checkbox" id="setting-promo" checked onchange="toggleStoreSetting('promoEnabled', this.checked)" class="w-4 h-4 accent-emerald-700 rounded cursor-pointer">
+              </div>
+
+              <div class="flex items-center justify-between py-2 border-t border-ivory-200">
+                <div>
+                  <p class="text-sm font-bold text-ink-900">إلزام تسجيل الدخول قبل النسخ</p>
+                  <p class="text-xs text-ink-500">يطلب اسم الزبون وحسابه قبل إرسال السلة</p>
+                </div>
+                <input type="checkbox" id="setting-require-login" checked onchange="toggleStoreSetting('requireLogin', this.checked)" class="w-4 h-4 accent-emerald-700 rounded cursor-pointer">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sales Analytics Chart -->
+        <div class="lg:col-span-7 bg-white rounded-2xl border border-ivory-300 p-6 shadow-sm">
+          <div class="flex items-center justify-between mb-6">
+            <div>
+              <h2 class="font-serif text-2xl font-bold text-ink-900">مبيعات الكتب الرقمية (آخر 7 أيام)</h2>
+              <p class="text-xs text-ink-500">إجمالي الطلبات المثبتة عبر رسائل إنستغرام</p>
+            </div>
+            <span class="px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-800 text-xs font-bold">+18.4% نمو</span>
+          </div>
+          <div id="admin-sales-chart" class="h-52 flex items-end justify-between gap-3 pt-6 px-2 border-b border-ivory-200">
+            <!-- CSS Bars populated dynamically -->
+          </div>
+          <div class="flex justify-between text-xs text-ink-500 font-semibold mt-2 px-2">
+            <span>السبت</span><span>الأحد</span><span>الإثنين</span><span>الثلاثاء</span><span>الأربعاء</span><span>الخميس</span><span>اليوم</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- INVENTORY & PRICING MANAGER TABLE -->
+      <div class="bg-white rounded-2xl border border-ivory-300 shadow-sm overflow-hidden">
+        <div class="p-6 border-b border-ivory-300 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h2 class="font-serif text-2xl font-bold text-ink-900">إدارة الكتب والتسعير الفوري</h2>
+            <p class="text-xs text-ink-500">عدّل الأسعار، أضف كتباً جديدة، أو حدّث العروض — التغييرات تظهر فوراً للزبائن.</p>
+          </div>
+          <button
+            onclick="openBookEditorModal()"
+            class="px-4 py-2 rounded-xl bg-ink-900 hover:bg-ink-800 text-white text-xs font-bold transition self-start sm:self-auto"
+          >
+            + إضافة كتاب جديد
+          </button>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-right border-collapse">
+            <thead>
+              <tr class="bg-ivory-100 text-ink-600 text-xs uppercase border-b border-ivory-300">
+                <th class="py-3.5 px-6 font-bold">عنوان الكتاب والمؤلف</th>
+                <th class="py-3.5 px-4 font-bold">التصنيف</th>
+                <th class="py-3.5 px-4 font-bold">الصيغ المتاحة</th>
+                <th class="py-3.5 px-4 font-bold">السعر والتعديل السريع</th>
+                <th class="py-3.5 px-4 font-bold">المبيعات</th>
+                <th class="py-3.5 px-6 font-bold text-left">إجراءات</th>
+              </tr>
+            </thead>
+            <tbody id="admin-inventory-tbody" class="divide-y divide-ivory-200 text-sm">
+              <!-- Populated dynamically -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- INSTAGRAM ORDERS LEDGER -->
+      <div class="bg-white rounded-2xl border border-ivory-300 shadow-sm overflow-hidden">
+        <div class="p-6 border-b border-ivory-300 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <h2 class="font-serif text-2xl font-bold text-ink-900">سجل طلبات الزبائن (إنستغرام)</h2>
+            <p class="text-xs text-ink-500">عند فتح رابط سلة مرسل من زبون وتثبيته، يظهر الطلب هنا لمتابعة التسليم.</p>
+          </div>
+          <span class="text-xs bg-emerald-50 text-emerald-800 border border-emerald-200 px-3 py-1 rounded-full font-bold self-start sm:self-auto">توثيق يدوي مرن</span>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-right border-collapse">
+            <thead>
+              <tr class="bg-ivory-100 text-ink-600 text-xs uppercase border-b border-ivory-300">
+                <th class="py-3.5 px-6 font-bold">رقم الطلب</th>
+                <th class="py-3.5 px-4 font-bold">الزبون وحساب إنستغرام</th>
+                <th class="py-3.5 px-4 font-bold">الكتب المطلوبة</th>
+                <th class="py-3.5 px-4 font-bold">المجموع</th>
+                <th class="py-3.5 px-6 font-bold">حالة الاستلام والتسليم</th>
+              </tr>
+            </thead>
+            <tbody id="admin-orders-tbody" class="divide-y divide-ivory-200 text-sm">
+              <!-- Populated dynamically -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="bg-ink-900 text-ivory-300 border-t border-ink-800 py-10 mt-auto">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-6">
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 rounded-lg bg-emerald-700 text-white flex items-center justify-center font-sans font-extrabold text-sm tracking-tight">FM</div>
+        <div>
+          <p class="font-sans text-lg font-bold text-white leading-none" dir="ltr">FMSTORE</p>
+          <p class="text-xs text-ink-400 mt-1">منصة الكتب الرقمية والطلب المباشر عبر إنستغرام</p>
+        </div>
+      </div>
+      <div class="flex flex-wrap items-center gap-5 text-xs text-ink-400">
+        <span class="flex items-center gap-1.5 text-emerald-400">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          روابط سلة مشفرة وقابلة للمشاركة
+        </span>
+        <span>بدون قيود DRM</span>
+        <span>© 2026 FMSTORE</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ===================================================================== -->
+  <!-- SLIDE-OVER SHOPPING CART DRAWER (سلة التسوق ونسخ الرابط لإنستغرام)     -->
+  <!-- ===================================================================== -->
+  <div id="cart-drawer-overlay" class="hidden fixed inset-0 z-50 bg-ink-900/60 backdrop-blur-xs transition-opacity" onclick="toggleCartDrawer(false)">
+    <div class="fixed inset-y-0 left-0 max-w-md w-full bg-ivory-50 shadow-2xl border-r border-ivory-300 flex flex-col animate-slide-left" onclick="event.stopPropagation()">
+      
+      <!-- Drawer Header -->
+      <div class="p-5 bg-white border-b border-ivory-300 flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <h2 class="font-serif text-2xl font-bold text-ink-900">سلة القراءة الخاصة بك</h2>
+          <span id="drawer-cart-count" class="px-2 py-0.5 text-xs font-bold rounded-full bg-emerald-800 text-white">0</span>
+        </div>
+        <button onclick="toggleCartDrawer(false)" class="p-2 rounded-full hover:bg-ivory-200 text-ink-700 transition">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+
+      <!-- Logged-in Customer Status Strip inside Cart -->
+      <div id="cart-customer-strip" class="px-5 py-2.5 bg-ivory-200/80 border-b border-ivory-300 flex items-center justify-between text-xs">
+        <!-- Populated dynamically -->
+      </div>
+
+      <!-- Cart Items List -->
+      <div id="cart-items-container" class="flex-1 overflow-y-auto p-5 space-y-3.5">
+        <!-- Populated dynamically -->
+      </div>
+
+      <!-- Order Bump + Promo + Copy Link & Instagram DM Footer -->
+      <div id="cart-footer" class="p-5 bg-white border-t border-ivory-300 space-y-3.5">
+        
+        <!-- Order Bump Offer -->
+        <div class="p-3 rounded-xl bg-amber-100/70 border border-amber-500/40 flex items-start gap-2.5">
+          <input
+            type="checkbox"
+            id="order-bump-checkbox"
+            onchange="toggleOrderBump(this.checked)"
+            class="mt-1 w-4 h-4 accent-emerald-700 rounded cursor-pointer"
+          />
+          <label for="order-bump-checkbox" class="text-xs cursor-pointer select-none">
+            <span class="font-bold text-ink-900 block">إضافة دفتر العمل والملخصات التنفيذية (+$9.00)</span>
+            <span class="text-ink-700">يشمل قوالب جاهزة وقوائم تطبيق عملية لكل فصل.</span>
+          </label>
+        </div>
+
+        <!-- Promo Code Input -->
+        <div>
+          <div class="flex gap-2">
+            <input
+              type="text"
+              id="promo-code-input"
+              placeholder="كود الخصم (جرّب WELCOME20)"
+              class="flex-1 px-3 py-2 bg-ivory-100 border border-ivory-300 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-emerald-700"
+            />
+            <button
+              onclick="applyPromoCode()"
+              class="px-3.5 py-2 rounded-lg bg-ink-900 hover:bg-ink-800 text-white text-xs font-bold transition"
+            >
+              تطبيق
+            </button>
+          </div>
+          <p id="promo-feedback" class="text-xs mt-1.5 hidden"></p>
+        </div>
+
+        <!-- Price Breakdown -->
+        <div class="space-y-1 text-sm border-t border-ivory-200 pt-2.5">
+          <div class="flex justify-between text-ink-600">
+            <span>المجموع الفرعي</span>
+            <span id="cart-subtotal" class="font-mono">$0.00</span>
+          </div>
+          <div id="cart-discount-row" class="hidden flex justify-between text-emerald-700 font-semibold">
+            <span>الخصم الترويجي (20%)</span>
+            <span id="cart-discount" class="font-mono">-$0.00</span>
+          </div>
+          <div class="flex justify-between text-base font-bold text-ink-900 pt-1 border-t border-ivory-200">
+            <span>الإجمالي النهائي</span>
+            <span id="cart-total" class="font-mono">$0.00</span>
+          </div>
+        </div>
+
+        <!-- Shareable Cart Link Box -->
+        <div class="p-2.5 rounded-xl bg-ivory-100 border border-ivory-300">
+          <div class="flex items-center justify-between mb-1">
+            <span class="text-[11px] font-bold text-ink-700">رابط السلة القابل للمشاركة:</span>
+            <span class="text-[10px] text-emerald-700 font-semibold">محدّث تلقائياً ✓</span>
+          </div>
+          <input
+            type="text"
+            id="shareable-cart-url-input"
+            readonly
+            dir="ltr"
+            onclick="this.select()"
+            class="w-full px-2.5 py-1.5 bg-white border border-ivory-300 rounded-lg text-[11px] font-mono text-ink-600 focus:outline-none"
+          />
+        </div>
+
+        <!-- PRIMARY INSTAGRAM & COPY ACTIONS -->
+        <div class="space-y-2 pt-1">
+          <button
+            onclick="copyCartAndOpenInstagram()"
+            class="w-full py-3.5 px-4 rounded-xl bg-gradient-to-l from-[#833AB4] via-[#FD1D1D] to-[#F77737] hover:opacity-95 text-white font-bold text-sm shadow-md transition flex items-center justify-center gap-2"
+          >
+            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+            <span>نسخ السلة وإرسال الطلب عبر إنستغرام</span>
+          </button>
+
+          <button
+            onclick="copyCartDetailsOnly()"
+            class="w-full py-2.5 px-4 rounded-xl bg-emerald-800 hover:bg-emerald-700 text-white font-semibold text-xs shadow-2xs transition flex items-center justify-center gap-2"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/></svg>
+            <span>نسخ رابط السلة وتفاصيل الطلب فقط</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- CUSTOMER LOGIN / PROFILE MODAL (تسجيل دخول الزبون)                    -->
+  <!-- ===================================================================== -->
+  <div id="login-modal" class="hidden fixed inset-0 z-50 bg-ink-900/75 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl border border-ivory-300 overflow-hidden animate-fade-in">
+      <div class="bg-ink-900 text-white px-6 py-4 flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+          <h3 class="font-serif text-xl font-bold">تسجيل دخول القارئ</h3>
+        </div>
+        <button onclick="closeLoginModal()" class="text-ivory-300 hover:text-white">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+
+      <form onsubmit="saveCustomerLogin(event)" class="p-6 space-y-4">
+        <p class="text-xs text-ink-600 leading-relaxed">
+          سجّل بياناتك لمرة واحدة ليتم تضمين اسمك وحسابك تلقائياً داخل رابط السلة عند إرساله إلى حسابنا على إنستغرام.
+        </p>
+
+        <div>
+          <label class="block text-xs font-bold text-ink-700 mb-1">الاسم الكامل *</label>
+          <input
+            type="text"
+            id="login-name"
+            required
+            placeholder="مثال: علي حسين"
+            class="w-full px-3.5 py-2.5 bg-ivory-50 border border-ivory-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-700"
+          />
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-ink-700 mb-1">حسابك على إنستغرام (للتواصل السريع) *</label>
+          <div class="relative">
+            <span class="absolute left-3.5 top-2.5 text-ink-500 font-mono text-sm">@</span>
+            <input
+              type="text"
+              id="login-instagram"
+              required
+              dir="ltr"
+              placeholder="ali.reader"
+              class="w-full pl-8 pr-3.5 py-2.5 bg-ivory-50 border border-ivory-300 rounded-xl text-sm font-mono focus:outline-none focus:ring-2 focus:ring-emerald-700"
+            />
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-ink-700 mb-1">البريد الإلكتروني (لاستلام النسخ الرقمية) *</label>
+          <input
+            type="email"
+            id="login-email"
+            required
+            dir="ltr"
+            placeholder="reader@example.com"
+            class="w-full px-3.5 py-2.5 bg-ivory-50 border border-ivory-300 rounded-xl text-sm font-mono focus:outline-none focus:ring-2 focus:ring-emerald-700"
+          />
+        </div>
+
+        <div class="flex items-center justify-between gap-3 pt-2">
+          <button
+            type="button"
+            id="logout-btn"
+            onclick="logoutCustomer()"
+            class="hidden px-4 py-2.5 rounded-xl border border-red-200 text-red-600 hover:bg-red-50 text-xs font-bold transition"
+          >
+            تسجيل خروج
+          </button>
+          <button
+            type="submit"
+            class="flex-1 py-3 px-5 rounded-xl bg-emerald-800 hover:bg-emerald-700 text-white font-bold text-sm shadow-sm transition"
+          >
+            حفظ والمتابعة للتسوق
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- INCOMING SHARED ORDER MODAL (نافذة استلام وتثبيت طلب الزبون للمالك)    -->
+  <!-- ===================================================================== -->
+  <div id="incoming-order-modal" class="hidden fixed inset-0 z-50 bg-ink-900/75 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white w-full max-w-lg rounded-2xl shadow-2xl border border-ivory-300 overflow-hidden animate-fade-in">
+      <div class="bg-emerald-800 text-white px-6 py-4 flex items-center justify-between">
+        <div>
+          <span class="text-[11px] text-emerald-200 font-semibold block">رابط سلة وارد من إنستغرام</span>
+          <h3 class="font-serif text-xl font-bold">تفاصيل طلب الزبون</h3>
+        </div>
+        <button onclick="closeIncomingOrderModal()" class="text-emerald-100 hover:text-white">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+
+      <div id="incoming-order-body" class="p-6 space-y-4">
+        <!-- Populated dynamically when ?cart=... is decoded -->
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- INTERACTIVE "LOOK INSIDE" SAMPLE READER MODAL (قارئ العينات التفاعلي)  -->
+  <!-- ===================================================================== -->
+  <div id="reader-modal" class="hidden fixed inset-0 z-50 bg-ink-900/75 backdrop-blur-xs flex items-center justify-center p-3 sm:p-6">
+    <div id="reader-container" class="bg-ivory-50 text-ink-900 w-full max-w-4xl h-[90vh] rounded-2xl shadow-2xl border border-ivory-300 flex flex-col overflow-hidden transition-colors duration-200">
+      
+      <!-- Reader Top Controls -->
+      <div id="reader-header" class="px-5 py-3.5 border-b border-ivory-300 flex flex-wrap items-center justify-between gap-3 bg-white/80 backdrop-blur-xs">
+        <div class="flex items-center gap-3">
+          <span class="px-2.5 py-0.5 rounded bg-amber-100 text-amber-700 text-xs font-bold">عينة مجانية</span>
+          <div>
+            <h3 id="reader-book-title" class="font-serif text-lg font-bold leading-tight">عنوان الكتاب</h3>
+            <p id="reader-book-author" class="text-xs opacity-75">اسم المؤلف</p>
+          </div>
+        </div>
+
+        <!-- Typography & Theme Switchers -->
+        <div class="flex items-center gap-2 sm:gap-3">
+          <div class="flex items-center rounded-lg border border-ivory-300 overflow-hidden text-xs font-semibold">
+            <button onclick="setReaderTheme('light')" class="px-2.5 py-1.5 bg-white text-ink-900 hover:bg-ivory-100">نهاري</button>
+            <button onclick="setReaderTheme('sepia')" class="px-2.5 py-1.5 bg-[#F4ECD8] text-[#433422] hover:opacity-90 border-x border-ivory-300">دافئ</button>
+            <button onclick="setReaderTheme('dark')" class="px-2.5 py-1.5 bg-ink-900 text-ivory-100 hover:bg-ink-800">ليلي</button>
+          </div>
+
+          <div class="flex items-center rounded-lg border border-ivory-300 overflow-hidden text-xs font-bold">
+            <button onclick="changeReaderFontSize(-1)" class="px-2.5 py-1.5 hover:bg-black/5">A-</button>
+            <button onclick="changeReaderFontSize(1)" class="px-2.5 py-1.5 hover:bg-black/5 border-r border-ivory-300">A+</button>
+          </div>
+
+          <button onclick="closeReaderModal()" class="p-2 rounded-full hover:bg-black/10 transition">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Reader Page Body -->
+      <div id="reader-body" class="flex-1 overflow-y-auto px-6 sm:px-14 py-8 sm:py-10">
+        <div id="reader-content" class="max-w-2xl mx-auto font-serif leading-relaxed space-y-5 text-lg">
+          <!-- Sample pages injected here -->
+        </div>
+      </div>
+
+      <!-- Reader Bottom Pagination & Add to Cart CTA -->
+      <div id="reader-footer" class="px-5 py-3.5 border-t border-ivory-300 flex flex-wrap items-center justify-between gap-3 bg-white/80 backdrop-blur-xs">
+        <div class="flex items-center gap-2">
+          <button id="reader-prev-btn" onclick="turnReaderPage(-1)" class="px-3 py-1.5 rounded-lg border border-ivory-300 text-xs font-bold hover:bg-black/5 disabled:opacity-40">
+            → الصفحة السابقة
+          </button>
+          <span id="reader-page-indicator" class="text-xs font-semibold px-2">صفحة 1 من 3</span>
+          <button id="reader-next-btn" onclick="turnReaderPage(1)" class="px-3 py-1.5 rounded-lg border border-ivory-300 text-xs font-bold hover:bg-black/5 disabled:opacity-40">
+            الصفحة التالية ←
+          </button>
+        </div>
+
+        <button
+          id="reader-buy-btn"
+          class="px-4 py-2 rounded-xl bg-emerald-800 hover:bg-emerald-700 text-white text-xs sm:text-sm font-bold shadow-sm transition flex items-center gap-2"
+        >
+          <span>أضف النسخة الكاملة للسلة</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- ADMIN BOOK ADD / EDIT MODAL (إضافة وتعديل الكتب)                      -->
+  <!-- ===================================================================== -->
+  <div id="book-editor-modal" class="hidden fixed inset-0 z-50 bg-ink-900/75 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white w-full max-w-xl rounded-2xl shadow-2xl border border-ivory-300 overflow-hidden animate-fade-in">
+      <div class="bg-ink-900 text-white px-6 py-4 flex items-center justify-between">
+        <h3 id="editor-modal-title" class="font-serif text-xl font-bold">نشر كتاب رقمي جديد</h3>
+        <button onclick="closeBookEditorModal()" class="text-ivory-300 hover:text-white">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+
+      <form onsubmit="saveBookFromAdmin(event)" class="p-6 space-y-4 max-h-[82vh] overflow-y-auto">
+        <input type="hidden" id="edit-book-id" />
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-bold text-ink-700 mb-1">عنوان الكتاب *</label>
+            <input type="text" id="edit-book-title" required placeholder="مثال: هندسة الأنظمة الذكية" class="w-full px-3 py-2 border border-ivory-300 rounded-lg text-sm">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-ink-700 mb-1">اسم المؤلف *</label>
+            <input type="text" id="edit-book-author" required placeholder="مثال: د. سارة المنصور" class="w-full px-3 py-2 border border-ivory-300 rounded-lg text-sm">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div>
+            <label class="block text-xs font-bold text-ink-700 mb-1">التصنيف</label>
+            <select id="edit-book-category" class="w-full px-3 py-2 border border-ivory-300 rounded-lg text-sm bg-white">
+              <option value="التقنية والذكاء الاصطناعي">التقنية والذكاء الاصطناعي</option>
+              <option value="الأعمال والاستراتيجية">الأعمال والاستراتيجية</option>
+              <option value="التصميم والإبداع">التصميم والإبداع</option>
+              <option value="الروايات والأدب">الروايات والأدب</option>
+              <option value="تطوير الذات">تطوير الذات</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-ink-700 mb-1">سعر البيع ($) *</label>
+            <input type="number" step="0.01" min="0" id="edit-book-price" required placeholder="19.00" class="w-full px-3 py-2 border border-ivory-300 rounded-lg text-sm">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-ink-700 mb-1">السعر قبل الخصم ($)</label>
+            <input type="number" step="0.01" min="0" id="edit-book-original-price" placeholder="25.00 (اختياري)" class="w-full px-3 py-2 border border-ivory-300 rounded-lg text-sm">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-bold text-ink-700 mb-1">لون الغلاف الفني</label>
+            <select id="edit-book-theme" class="w-full px-3 py-2 border border-ivory-300 rounded-lg text-sm bg-white">
+              <option value="emerald">زمردي ملكي وذهبي</option>
+              <option value="midnight">كحلي ليلي وسماوي</option>
+              <option value="terracotta">طيني دافئ وكريمي</option>
+              <option value="indigo">نيلي عميق وعنبري</option>
+              <option value="charcoal">أسود فحمي ووردي</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-ink-700 mb-1">الصيغ المشمولة</label>
+            <div class="flex items-center gap-3 pt-2 text-xs font-semibold">
+              <label class="flex items-center gap-1"><input type="checkbox" id="fmt-epub" checked class="accent-emerald-700"> EPUB</label>
+              <label class="flex items-center gap-1"><input type="checkbox" id="fmt-pdf" checked class="accent-emerald-700"> PDF</label>
+              <label class="flex items-center gap-1"><input type="checkbox" id="fmt-audio" class="accent-emerald-700"> صوتي</label>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-ink-700 mb-1">نبذة تعريفية عن الكتاب *</label>
+          <textarea id="edit-book-desc" rows="2" required placeholder="وصف مختصر وجذاب يظهر للزبائن في واجهة المتجر..." class="w-full px-3 py-2 border border-ivory-300 rounded-lg text-sm"></textarea>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-ink-700 mb-1">مقتطف القراءة المجانية (لزر "تصفح الكتاب")</label>
+          <textarea id="edit-book-sample" rows="3" placeholder="اكتب الفقرات الافتتاحية التي يمكن للزبون قراءتها قبل الشراء..." class="w-full px-3 py-2 border border-ivory-300 rounded-lg text-sm"></textarea>
+        </div>
+
+        <div class="flex justify-end gap-3 pt-3 border-t border-ivory-200">
+          <button type="button" onclick="closeBookEditorModal()" class="px-4 py-2 rounded-lg border border-ivory-300 text-sm font-semibold text-ink-700 hover:bg-ivory-100">إلغاء</button>
+          <button type="submit" class="px-5 py-2 rounded-lg bg-emerald-800 hover:bg-emerald-700 text-white text-sm font-bold shadow-sm">حفظ ونشر في المتجر</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- TOAST NOTIFICATION BANNER -->
+  <div id="toast-container" class="fixed bottom-5 right-5 z-50 space-y-2 pointer-events-none"></div>
+
+  <!-- ===================================================================== -->
+  <!-- APPLICATION LOGIC & STATE MANAGEMENT                                  -->
+  <!-- ===================================================================== -->
+  <script>
+    // -----------------------------------------------------------------------
+    // 1. لوحات ألوان الأغلفة وقائمة الكتب الافتراضية (يمكنك تعديلها يدوياً هنا)
+    // -----------------------------------------------------------------------
+    const COVER_THEMES = {
+      emerald: {
+        bg: 'from-[#134235] via-[#1B5B4A] to-[#0D2E25]',
+        accent: '#E5B567',
+        pattern: 'radial-gradient(circle at 80% 20%, rgba(229,181,103,0.22) 0%, transparent 55%)'
+      },
+      midnight: {
+        bg: 'from-[#141E30] via-[#243B55] to-[#0F172A]',
+        accent: '#38BDF8',
+        pattern: 'radial-gradient(circle at 25% 80%, rgba(56,189,248,0.22) 0%, transparent 55%)'
+      },
+      terracotta: {
+        bg: 'from-[#7C2D12] via-[#9A3412] to-[#431407]',
+        accent: '#FDE68A',
+        pattern: 'radial-gradient(circle at 75% 25%, rgba(253,230,138,0.22) 0%, transparent 55%)'
+      },
+      indigo: {
+        bg: 'from-[#1E1B4B] via-[#312E81] to-[#17153B]',
+        accent: '#F59E0B',
+        pattern: 'radial-gradient(circle at 80% 75%, rgba(245,158,11,0.22) 0%, transparent 55%)'
+      },
+      charcoal: {
+        bg: 'from-[#18181B] via-[#27272A] to-[#09090B]',
+        accent: '#FDA4AF',
+        pattern: 'radial-gradient(circle at 30% 20%, rgba(253,164,175,0.2) 0%, transparent 55%)'
+      }
+    };
+
+    /* =========================================================================
+       قائمة الكتب الافتراضية للمتجر (DEFAULT_BOOKS)
+       شرح الحقول لتسهيل التعديل اليدوي:
+       - id            : رمز تعريفي فريد للكتاب (مثل 'bk-101')
+       - title         : العنوان الرئيسي للكتاب
+       - subtitle      : العنوان الفرعي المختصر
+       - author        : اسم المؤلف
+       - category      : التصنيف (التقنية والذكاء الاصطناعي / الأعمال والاستراتيجية / التصميم والإبداع / الروايات والأدب / تطوير الذات)
+       - price         : سعر البيع الحالي بالدولار
+       - originalPrice : السعر الأصلي قبل الخصم (اكتب null إذا لم يوجد خصم)
+       - formats       : الصيغ المتوفرة ['EPUB', 'PDF', 'صوتي']
+       - theme         : لون الغلاف ('emerald' أو 'indigo' أو 'terracotta' أو 'midnight' أو 'charcoal')
+       - featured      : هل يظهر ككتاب رئيسي في أعلى الصفحة؟ (true أو false)
+       - description   : النبذة التعريفية التي تظهر للزبون في بطاقة الكتاب
+       - samplePages   : مقتطفات القراءة المجانية لزر "تصفح الكتاب" (كل فقرة بين علامتي تنصيص)
+       ========================================================================= */
+    /* DEFAULT_BOOKS_START */
+    const DEFAULT_BOOKS = [
+      {
+        id: 'bk-101',
+        title: 'معمارية الذكاء الاصطناعي', // العنوان
+        subtitle: 'الأنماط التأسيسية لبناء الأنظمة المستقلة والوكلاء الأذكياء', // العنوان الفرعي
+        author: 'د. إيلينا روستوفا', // المؤلف
+        category: 'التقنية والذكاء الاصطناعي', // التصنيف
+        price: 24.00, // السعر
+        originalPrice: 32.00, // السعر قبل الخصم
+        rating: 4.9,
+        reviews: 418,
+        pages: 342,
+        formats: ['EPUB', 'PDF', 'صوتي'],
+        theme: 'emerald',
+        featured: true,
+        soldCount: 340,
+        description: 'دليل هندسي متكامل يستكشف تنسيق الوكلاء المتعددين، وبناء أنظمة برمجية موثوقة وعالية الأداء قابلة للتوسع.', // الوصف
+        samplePages: [ // مقتطف القراءة المجانية
+          "الفصل الأول: الجوهر الحتمي للأنظمة الذكية\n\nكل نظام برمجي ناجح يوازن بين الاستكشاف الاحتمالي والضمانات الهندسية الدقيقة. عندما ننتقل من التطبيقات التقليدية إلى أنظمة التفكير المستقلة، يصبح تصميم الحدود بين المواصفات والتنفيذ هو التحدي الأهم.\n\nفي هذا الفصل الافتتاحي، نستعرض كيف تتيح العقود البرمجية الصارمة وإدارة الحالة المنظمة بناء تطبيقات موثوقة وسهلة التدقيق.",
+          "١.٢ هرمية الذاكرة ونوافذ السياق\n\nتعتمد الذاكرة البشرية على الاستدعاء المتدرج: ذاكرة عاملة للتحليل الفوري، وذاكرة عرضية للسرد الزمني، وذاكرة دلالية للحقائق الراسخة. وتعكس المعماريات الحاسوبية الحديثة هذا التدرج بدقة متناهية.",
+          "١.٣ النشر الرقمي المستقل\n\nعندما يمتلك المؤلفون والناشرون قنوات التوزيع الخاصة بهم وعلاقتهم المباشرة مع القراء، تتراكم القيمة دون وسطاء."
+        ]
+      },
+      {
+        id: 'bk-102',
+        title: 'النمو الهادئ والمستدام', // العنوان
+        subtitle: 'تخصيص رأس المال، الرهانات الذكية واستراتيجيات المدى الطويل', // العنوان الفرعي
+        author: 'ماركوس ستيرلنغ', // المؤلف
+        category: 'الأعمال والاستراتيجية', // التصنيف
+        price: 19.00, // السعر
+        originalPrice: 26.00, // السعر قبل الخصم
+        rating: 4.8,
+        reviews: 295,
+        pages: 276,
+        formats: ['EPUB', 'PDF'],
+        theme: 'indigo',
+        featured: false,
+        soldCount: 280,
+        description: 'لماذا يتجنب رواد الأعمال الأكثر نجاحاً التوسع العشوائي لصالح بناء أصول رقمية عالية الهامش وقوة تسعيرية حقيقية.', // الوصف
+        samplePages: [ // مقتطف القراءة المجانية
+          "مقدمة: نهاية النمو السريع غير المدروس\n\nلأكثر من عقد، أخفى رأس المال الرخيص هشاشة نماذج الأعمال. اليوم، البقاء والريادة لمن يمتلكون قوة تسعيرية حقيقية وثقة مباشرة من عملائهم.\n\nهذا الكتاب هو دليل عملي للمؤسسين والناشرين المستقلين لبناء مشاريع رقمية مربحة ومستدامة.",
+          "الفصل الثاني: التسعير كإشارة للقيمة\n\nالتسعير المنخفض لعمل فكري عميق يرسل إشارة بعدم اليقين. عندما تجمع بين الإتقان المعرفي والتسليم الفوري، يصبح السعر معياراً للجودة."
+        ]
+      },
+      {
+        id: 'bk-103',
+        title: 'الشبكة والإيقاع والصمت', // العنوان
+        subtitle: 'فن التيبوغرافيا التحريرية وتصميم الواجهات الرقمية الهادئة', // العنوان الفرعي
+        author: 'سورين ليندكفيست', // المؤلف
+        category: 'التصميم والإبداع', // التصنيف
+        price: 21.00, // السعر
+        originalPrice: null, // السعر قبل الخصم
+        rating: 4.9,
+        reviews: 312,
+        pages: 228,
+        formats: ['EPUB', 'PDF'],
+        theme: 'terracotta',
+        featured: false,
+        soldCount: 215,
+        description: 'جسر يربط بين خمسة قرون من فنون الطباعة الكلاسيكية وتصميم الواجهات الرقمية الحديثة والتباين البصري المريح للقراءة.', // الوصف
+        samplePages: [ // مقتطف القراءة المجانية
+          "أولاً: الصفحة مساحة معمارية\n\nقبل قراءة كلمة واحدة، تؤسس النسب والمسافات شعوراً بالثقة. الهوامش ليست فراغاً ضائعاً، بل هي الصمت البصري الذي يسمح للحروف بالتنفس.\n\nفي الواجهات الرقمية، الفوضى هي عدو الفهم. من خلال احترام الإيقاع البصري ولوحات الألوان الهادئة، نعيد الهيبة لتجربة القراءة."
+        ]
+      },
+      {
+        id: 'bk-104',
+        title: 'رسّام خرائط الزجاج', // العنوان
+        subtitle: 'رواية أدبية عن الذاكرة والمدن الساحلية التي يعيد المدّ تشكيلها', // العنوان الفرعي
+        author: 'كلارا فانس مورو', // المؤلف
+        category: 'الروايات والأدب', // التصنيف
+        price: 14.00, // السعر
+        originalPrice: 18.00, // السعر قبل الخصم
+        rating: 4.7,
+        reviews: 530,
+        pages: 384,
+        formats: ['EPUB', 'PDF', 'صوتي'],
+        theme: 'midnight',
+        featured: false,
+        soldCount: 490,
+        description: 'في أرخبيل يعيد المدّ البحري رسم سواحله كل عقد، يكتشف أمين أرشيف عدسة قادرة على إظهار التواريخ المنسية.', // الوصف
+        samplePages: [ // مقتطف القراءة المجانية
+          "الجزء الأول: أرشيف الملح\n\nعند انحسار المدّ، كان المرصد القديم يرتفع من المصب كأضلاع سفينة غارقة. حمل جوليان فرجاره النحاسي في حقيبته القماشية المشمّعة، حريصاً على حماية الألواح الزجاجية من رذاذ البحر.\n\nلم تبقَ خريطة واحدة للميناء دقيقة لأكثر من سبعة فصول شتاء؛ فقد كان البحر محرراً لا يهدأ."
+        ]
+      },
+      {
+        id: 'bk-105',
+        title: 'العزلة الاختيارية والتركيز العميق', // العنوان
+        subtitle: 'استعادة الصفاء الذهني والإبداع في عصر الضجيج المستمر', // العنوان الفرعي
+        author: 'د. كينجي تاكاهاشي', // المؤلف
+        category: 'تطوير الذات', // التصنيف
+        price: 16.00, // السعر
+        originalPrice: null, // السعر قبل الخصم
+        rating: 4.8,
+        reviews: 204,
+        pages: 210,
+        formats: ['EPUB', 'صوتي'],
+        theme: 'charcoal',
+        featured: false,
+        soldCount: 195,
+        description: 'طقوس وعادات مدعومة بعلم الأعصاب لاستعادة التركيز غير المتقطع، والتأمل المنظم، والإنتاج الإبداعي المستدام.', // الوصف
+        samplePages: [ // مقتطف القراءة المجانية
+          "الفصل الأول: الانتباه هو عملتك السيادية\n\nالانتباه المشتت ينتج تفكيراً سطحياً. عندما نتفقد الإشعارات كل ست دقائق، فإننا لا نغوص أبداً إلى طبقات التحليل العميق.\n\nيضع هذا الكتاب بروتوكولاً عملياً لمدة 90 يوماً لحماية ساعات الصباح الذهبية."
+        ]
+      },
+      {
+        id: 'bk-106',
+        title: 'أمن المعلومات والتشفير العملي', // العنوان
+        subtitle: 'تطبيق التواقيع الرقمية وحماية المحتوى والروابط المشفرة', // العنوان الفرعي
+        author: 'هنريك سولبيرغ', // المؤلف
+        category: 'التقنية والذكاء الاصطناعي', // التصنيف
+        price: 27.00, // السعر
+        originalPrice: 35.00, // السعر قبل الخصم
+        rating: 5.0,
+        reviews: 167,
+        pages: 412,
+        formats: ['EPUB', 'PDF'],
+        theme: 'emerald',
+        featured: false,
+        soldCount: 160,
+        description: 'هندسة الأمن السيبراني التطبيقية: التواقيع الرقمية، تشفير البيانات، وحماية منصات المحتوى الرقمي الحديثة.', // الوصف
+        samplePages: [ // مقتطف القراءة المجانية
+          "القسم الأول: الروابط الموقّعة ومشاركة الحالة\n\nتتيح تقنيات الترميز الموقّع نقل بيانات السلة والطلبات عبر الروابط بأمان ومرونة عالية دون تعقيد تجربة المستخدم."
+        ]
+      }
+    ];
+    /* DEFAULT_BOOKS_END */
+
+    const DEFAULT_ORDERS = [
+      {
+        id: 'ORD-8942',
+        customerName: 'أحمد الكاظمي',
+        instagram: '@ahmed.k99',
+        email: 'ahmed.k@example.com',
+        items: ['معمارية الذكاء الاصطناعي', 'دفتر العمل والملخصات'],
+        total: 26.40,
+        date: 'منذ 15 دقيقة',
+        status: 'تم الاستلام والتسليم عبر إنستغرام'
+      },
+      {
+        id: 'ORD-8941',
+        customerName: 'نور الهدى',
+        instagram: '@noor.reads',
+        email: 'noor.h@example.com',
+        items: ['النمو الهادئ والمستدام'],
+        total: 19.00,
+        date: 'منذ ساعة',
+        status: 'تم الاستلام والتسليم عبر إنستغرام'
+      }
+    ];
+
+    const CATEGORIES = ['الكل', 'التقنية والذكاء الاصطناعي', 'الأعمال والاستراتيجية', 'التصميم والإبداع', 'الروايات والأدب', 'تطوير الذات'];
+
+    /* DEFAULT_CONFIG_START */
+    const DEFAULT_STORE_CONFIG = {
+      instagramUsername: 'fmstore',
+      promoEnabled: true,
+      requireLogin: true
+    };
+    /* DEFAULT_CONFIG_END */
+
+    // Load persisted state or initialize defaults
+    let books = JSON.parse(localStorage.getItem('fp_books_ar')) || DEFAULT_BOOKS;
+    let orders = JSON.parse(localStorage.getItem('fp_orders_ar')) || DEFAULT_ORDERS;
+    let customerUser = JSON.parse(localStorage.getItem('fp_customer_ar')) || null;
+    let storeConfig = JSON.parse(localStorage.getItem('fp_config_ar')) || DEFAULT_STORE_CONFIG;
+
+    let state = {
+      currentView: 'storefront',
+      selectedCategory: 'الكل',
+      searchQuery: '',
+      sortBy: 'featured',
+      cart: [],
+      orderBump: false,
+      promoApplied: false,
+      readerBookId: null,
+      readerPage: 0,
+      readerTheme: 'light',
+      readerFontSize: 18,
+      incomingSharedPayload: null,
+      pendingActionAfterLogin: null
+    };
+
+    function persistAll() {
+      localStorage.setItem('fp_books_ar', JSON.stringify(books));
+      localStorage.setItem('fp_orders_ar', JSON.stringify(orders));
+      localStorage.setItem('fp_config_ar', JSON.stringify(storeConfig));
+      if (customerUser) {
+        localStorage.setItem('fp_customer_ar', JSON.stringify(customerUser));
+      } else {
+        localStorage.removeItem('fp_customer_ar');
+      }
+    }
+
+    // -----------------------------------------------------------------------
+    // 2. INITIALIZATION & URL SHARED CART DECODING (?cart=...)
+    // -----------------------------------------------------------------------
+    window.addEventListener('DOMContentLoaded', () => {
+      updateUserHeaderUI();
+      syncAdminConfigInputs();
+      checkIncomingSharedCartURL();
+      renderHeroFeatured();
+      renderCategoryPills();
+      renderBookGrid();
+      updateCartUI();
+      renderAdminDashboard();
+    });
+
+    function encodeBase64Unicode(str) {
+      return btoa(unescape(encodeURIComponent(str)));
+    }
+
+    function decodeBase64Unicode(str) {
+      return decodeURIComponent(escape(atob(str)));
+    }
+
+    function buildShareableCartURL() {
+      const payload = {
+        c: customerUser ? {
+          n: customerUser.name,
+          ig: customerUser.instagram,
+          em: customerUser.email
+        } : null,
+        items: state.cart.map(i => i.bookId),
+        bump: state.orderBump ? 1 : 0,
+        promo: state.promoApplied ? 'WELCOME20' : ''
+      };
+
+      const encoded = encodeBase64Unicode(JSON.stringify(payload));
+      const baseUrl = window.location.origin && window.location.origin !== 'null'
+        ? `${window.location.origin}${window.location.pathname}`
+        : window.location.href.split('?')[0];
+
+      return `${baseUrl}?cart=${encodeURIComponent(encoded)}`;
+    }
+
+    function checkIncomingSharedCartURL() {
+      try {
+        const params = new URLSearchParams(window.location.search);
+        const cartParam = params.get('cart');
+        if (!cartParam) return;
+
+        const decoded = JSON.parse(decodeBase64Unicode(cartParam));
+        if (!decoded || !Array.isArray(decoded.items) || decoded.items.length === 0) return;
+
+        // Populate cart with the shared items
+        state.cart = decoded.items
+          .filter(id => books.some(b => b.id === id))
+          .map(id => ({ bookId: id }));
+        state.orderBump = Boolean(decoded.bump);
+        state.promoApplied = decoded.promo === 'WELCOME20';
+
+        document.getElementById('order-bump-checkbox').checked = state.orderBump;
+        if (state.promoApplied) {
+          document.getElementById('promo-code-input').value = 'WELCOME20';
+        }
+
+        state.incomingSharedPayload = decoded;
+
+        const customerLabel = decoded.c
+          ? `${decoded.c.n} (@${decoded.c.ig.replace(/^@/, '')})`
+          : 'زبون غير مسجل';
+
+        document.getElementById('shared-cart-summary-text').textContent =
+          `الزبون: ${customerLabel} • عدد الكتب: ${state.cart.length} • اضغط للمراجعة وتثبيت الطلب`;
+        document.getElementById('shared-cart-banner').classList.remove('hidden');
+      } catch (err) {
+        console.warn('Could not parse incoming cart parameter:', err);
+      }
+    }
+
+    function dismissSharedCartBanner() {
+      document.getElementById('shared-cart-banner').classList.add('hidden');
+    }
+
+    function openIncomingOrderModal() {
+      const payload = state.incomingSharedPayload;
+      if (!payload) return;
+
+      const matchedBooks = payload.items
+        .map(id => books.find(b => b.id === id))
+        .filter(Boolean);
+
+      const { subtotal, discount, total } = calculateCartTotals();
+      const custName = payload.c ? payload.c.n : 'زبون عبر الرابط';
+      const custIg = payload.c ? `@${payload.c.ig.replace(/^@/, '')}` : 'غير محدد';
+      const custEmail = payload.c ? payload.c.em : 'غير محدد';
+
+      document.getElementById('incoming-order-body').innerHTML = `
+        <div class="p-4 rounded-xl bg-ivory-100 border border-ivory-300 space-y-1.5 text-sm">
+          <div class="flex justify-between">
+            <span class="text-ink-500">اسم الزبون:</span>
+            <span class="font-bold text-ink-900">${escapeHTML(custName)}</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-ink-500">حساب إنستغرام:</span>
+            <span class="font-mono font-bold text-emerald-800" dir="ltr">${escapeHTML(custIg)}</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-ink-500">البريد الإلكتروني:</span>
+            <span class="font-mono text-xs text-ink-800" dir="ltr">${escapeHTML(custEmail)}</span>
+          </div>
+        </div>
+
+        <div class="space-y-2">
+          <h4 class="text-xs font-bold text-ink-700">الكتب المطلوبة في السلة:</h4>
+          <ul class="divide-y divide-ivory-200 border border-ivory-300 rounded-xl overflow-hidden bg-white">
+            ${matchedBooks.map(b => `
+              <li class="px-4 py-2.5 flex items-center justify-between text-sm">
+                <span class="font-semibold text-ink-900">${escapeHTML(b.title)}</span>
+                <span class="font-mono font-bold text-ink-800">$${b.price.toFixed(2)}</span>
+              </li>
+            `).join('')}
+            ${payload.bump ? `
+              <li class="px-4 py-2.5 flex items-center justify-between text-sm bg-amber-50">
+                <span class="font-semibold text-amber-800">+ دفتر العمل والملخصات التنفيذية</span>
+                <span class="font-mono font-bold text-amber-800">$9.00</span>
+              </li>
+            ` : ''}
+          </ul>
+        </div>
+
+        <div class="flex items-center justify-between pt-2 border-t border-ivory-200">
+          <div>
+            <span class="text-xs text-ink-500 block">المبلغ المطلوب تحصيله</span>
+            <span class="text-2xl font-bold font-mono text-emerald-800">$${total.toFixed(2)}</span>
+            ${discount > 0 ? `<span class="text-[11px] text-emerald-700 block">شامل خصم WELCOME20 (-$${discount.toFixed(2)})</span>` : ''}
+          </div>
+          <button
+            onclick="confirmIncomingOrderToLedger()"
+            class="px-5 py-3 rounded-xl bg-emerald-800 hover:bg-emerald-700 text-white font-bold text-xs sm:text-sm shadow-md transition"
+          >
+            ✓ تثبيت الطلب في سجل المبيعات
+          </button>
+        </div>
+      `;
+
+      document.getElementById('incoming-order-modal').classList.remove('hidden');
+    }
+
+    function closeIncomingOrderModal() {
+      document.getElementById('incoming-order-modal').classList.add('hidden');
+    }
+
+    function confirmIncomingOrderToLedger() {
+      const payload = state.incomingSharedPayload;
+      if (!payload) return;
+
+      const matchedBooks = payload.items
+        .map(id => books.find(b => b.id === id))
+        .filter(Boolean);
+
+      matchedBooks.forEach(b => {
+        b.soldCount = (b.soldCount || 0) + 1;
+      });
+
+      const itemTitles = matchedBooks.map(b => b.title);
+      if (payload.bump) itemTitles.push('دفتر العمل والملخصات');
+
+      const { total } = calculateCartTotals();
+      const newOrder = {
+        id: `ORD-${Math.floor(1000 + Math.random() * 9000)}`,
+        customerName: payload.c ? payload.c.n : 'زبون إنستغرام',
+        instagram: payload.c ? `@${payload.c.ig.replace(/^@/, '')}` : '@instagram_user',
+        email: payload.c ? payload.c.em : '—',
+        items: itemTitles,
+        total,
+        date: 'الآن',
+        status: 'تم التثبيت • بانتظار إرسال الملفات'
+      };
+
+      orders.unshift(newOrder);
+      persistAll();
+      closeIncomingOrderModal();
+      dismissSharedCartBanner();
+      switchView('admin');
+      showToast(`تم تثبيت الطلب ${newOrder.id} في سجل المبيعات!`, 'success');
+    }
+
+    // -----------------------------------------------------------------------
+    // 3. CUSTOMER LOGIN / PROFILE MANAGEMENT
+    // -----------------------------------------------------------------------
+    function updateUserHeaderUI() {
+      const label = document.getElementById('header-user-label');
+      if (customerUser) {
+        label.textContent = customerUser.name;
+      } else {
+        label.textContent = 'تسجيل الدخول';
+      }
+      updateCartCustomerStrip();
+    }
+
+    function updateCartCustomerStrip() {
+      const strip = document.getElementById('cart-customer-strip');
+      if (!strip) return;
+
+      if (customerUser) {
+        strip.innerHTML = `
+          <div class="flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-emerald-600"></span>
+            <span class="font-bold text-ink-900">${escapeHTML(customerUser.name)}</span>
+            <span class="font-mono text-ink-600" dir="ltr">@${escapeHTML(customerUser.instagram.replace(/^@/, ''))}</span>
+          </div>
+          <button onclick="openLoginModal()" class="text-emerald-800 font-bold hover:underline">تعديل</button>
+        `;
+      } else {
+        strip.innerHTML = `
+          <span class="text-ink-700">سجّل دخولك لربط اسمك وحسابك بالسلة</span>
+          <button onclick="openLoginModal()" class="px-2.5 py-1 rounded-md bg-ink-900 text-white font-bold">تسجيل الدخول</button>
+        `;
+      }
+    }
+
+    function openLoginModal(pendingAction = null) {
+      state.pendingActionAfterLogin = pendingAction;
+      const logoutBtn = document.getElementById('logout-btn');
+
+      if (customerUser) {
+        document.getElementById('login-name').value = customerUser.name;
+        document.getElementById('login-instagram').value = customerUser.instagram.replace(/^@/, '');
+        document.getElementById('login-email').value = customerUser.email;
+        logoutBtn.classList.remove('hidden');
+      } else {
+        document.getElementById('login-name').value = '';
+        document.getElementById('login-instagram').value = '';
+        document.getElementById('login-email').value = '';
+        logoutBtn.classList.add('hidden');
+      }
+
+      document.getElementById('login-modal').classList.remove('hidden');
+    }
+
+    function closeLoginModal() {
+      document.getElementById('login-modal').classList.add('hidden');
+    }
+
+    function saveCustomerLogin(event) {
+      event.preventDefault();
+      const name = document.getElementById('login-name').value.trim();
+      const instagram = document.getElementById('login-instagram').value.trim().replace(/^@/, '');
+      const email = document.getElementById('login-email').value.trim();
+
+      customerUser = { name, instagram, email };
+      persistAll();
+      updateUserHeaderUI();
+      updateCartUI();
+      closeLoginModal();
+      showToast(`أهلاً بك يا ${name}! تم حفظ بياناتك في السلة.`, 'success');
+
+      if (state.pendingActionAfterLogin === 'instagram') {
+        state.pendingActionAfterLogin = null;
+        copyCartAndOpenInstagram();
+      } else if (state.pendingActionAfterLogin === 'copy') {
+        state.pendingActionAfterLogin = null;
+        copyCartDetailsOnly();
+      }
+    }
+
+    function logoutCustomer() {
+      customerUser = null;
+      persistAll();
+      updateUserHeaderUI();
+      updateCartUI();
+      closeLoginModal();
+      showToast('تم تسجيل الخروج من الحساب.', 'info');
+    }
+
+    // -----------------------------------------------------------------------
+    // 4. VIEW ROUTING
+    // -----------------------------------------------------------------------
+    function switchView(view) {
+      state.currentView = view;
+      const storefrontEl = document.getElementById('view-storefront');
+      const adminEl = document.getElementById('view-admin');
+      const btnStore = document.getElementById('btn-view-storefront');
+      const btnAdmin = document.getElementById('btn-view-admin');
+      const searchDesktop = document.getElementById('header-search-container');
+      const searchMobile = document.getElementById('mobile-search-container');
+
+      if (view === 'storefront') {
+        storefrontEl.classList.remove('hidden');
+        adminEl.classList.add('hidden');
+        btnStore.classList.add('bg-white', 'text-ink-900', 'shadow-sm');
+        btnStore.classList.remove('text-ink-700');
+        btnAdmin.classList.remove('bg-white', 'text-ink-900', 'shadow-sm');
+        btnAdmin.classList.add('text-ink-700');
+        searchDesktop.classList.remove('md:hidden');
+        searchMobile.classList.remove('hidden');
+        renderHeroFeatured();
+        renderBookGrid();
+      } else {
+        storefrontEl.classList.add('hidden');
+        adminEl.classList.remove('hidden');
+        btnAdmin.classList.add('bg-white', 'text-ink-900', 'shadow-sm');
+        btnAdmin.classList.remove('text-ink-700');
+        btnStore.classList.remove('bg-white', 'text-ink-900', 'shadow-sm');
+        btnStore.classList.add('text-ink-700');
+        searchDesktop.classList.add('md:hidden');
+        searchMobile.classList.add('hidden');
+        renderAdminDashboard();
+      }
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // -----------------------------------------------------------------------
+    // 5. 3D ARABIC BOOK COVER GENERATOR
+    // -----------------------------------------------------------------------
+    function generateBookCoverHTML(book, size = 'card') {
+      const theme = COVER_THEMES[book.theme] || COVER_THEMES.emerald;
+      const isHero = size === 'hero';
+      const dimensions = isHero
+        ? 'w-56 sm:w-64 h-80 sm:h-96 p-6'
+        : 'w-44 h-64 p-4';
+
+      return `
+        <div class="book-cover-wrapper select-none">
+          <div class="book-cover ${dimensions} rounded-l-xl rounded-r-sm bg-gradient-to-bl ${theme.bg} text-white flex flex-col justify-between overflow-hidden relative" style="background-image: ${theme.pattern}">
+            <div class="book-spine-crease"></div>
+            
+            <!-- Top Publisher Mark & Geometric SVG Art -->
+            <div class="relative z-10 flex items-center justify-between pr-2">
+              <span class="text-[10px] font-bold opacity-85 tracking-wider font-sans">FMSTORE</span>
+              <svg class="w-5 h-5 opacity-80" viewBox="0 0 24 24" fill="none" stroke="${theme.accent}" stroke-width="1.6">
+                <circle cx="12" cy="12" r="9"/>
+                <path d="M12 3v18M3 12h18"/>
+              </svg>
+            </div>
+
+            <!-- Abstract Editorial Motif -->
+            <div class="relative z-10 my-auto pr-2">
+              <div class="w-8 h-0.5 mb-2.5" style="background-color: ${theme.accent}"></div>
+              <h4 class="font-serif ${isHero ? 'text-2xl sm:text-3xl' : 'text-xl'} font-bold leading-snug text-ivory-50">
+                ${escapeHTML(book.title)}
+              </h4>
+              ${isHero && book.subtitle ? `<p class="text-xs text-ivory-200/85 mt-2 line-clamp-2 leading-relaxed">${escapeHTML(book.subtitle)}</p>` : ''}
+            </div>
+
+            <!-- Author Footer -->
+            <div class="relative z-10 pr-2 pt-2 border-t border-white/15 flex items-center justify-between">
+              <span class="text-[11px] font-semibold text-ivory-100">${escapeHTML(book.author)}</span>
+              <span class="text-[9px] font-mono px-1.5 py-0.5 rounded bg-black/25 text-ivory-200">${escapeHTML(book.formats[0])}</span>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    // -----------------------------------------------------------------------
+    // 6. STOREFRONT RENDERING & FILTERING
+    // -----------------------------------------------------------------------
+    function renderHeroFeatured() {
+      const heroBook = books.find(b => b.featured) || books[0];
+      if (!heroBook) return;
+
+      const hasDiscount = heroBook.originalPrice && heroBook.originalPrice > heroBook.price;
+
+      document.getElementById('hero-featured-container').innerHTML = `
+        <div class="lg:col-span-7 space-y-5">
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-100 border border-amber-500/30 text-amber-700 text-xs font-bold">
+            <span>★ الإصدار الرقمي المميز</span>
+            <span>•</span>
+            <span>${escapeHTML(heroBook.category)}</span>
+          </div>
+
+          <h1 class="font-serif text-4xl sm:text-5xl lg:text-6xl font-bold text-ink-900 leading-[1.15]">
+            ${escapeHTML(heroBook.title)}
+          </h1>
+
+          <p class="text-base sm:text-lg text-ink-700 max-w-2xl leading-relaxed">
+            ${escapeHTML(heroBook.description)}
+          </p>
+
+          <div class="flex flex-wrap items-center gap-4 text-sm text-ink-600">
+            <span class="font-bold text-ink-900">تأليف: ${escapeHTML(heroBook.author)}</span>
+            <span>•</span>
+            <span class="flex items-center gap-1 text-amber-600 font-bold">
+              ★ ${heroBook.rating.toFixed(1)} <span class="text-ink-500 font-normal">(${heroBook.reviews} تقييم)</span>
+            </span>
+            <span>•</span>
+            <span>${heroBook.pages} صفحة</span>
+          </div>
+
+          <div class="flex flex-wrap items-center gap-2 pt-1">
+            ${heroBook.formats.map(f => `
+              <span class="px-2.5 py-1 rounded-md bg-white border border-ivory-300 text-xs font-semibold text-ink-800 shadow-2xs">
+                ✓ ${escapeHTML(f)}
+              </span>
+            `).join('')}
+          </div>
+
+          <div class="flex flex-wrap items-center gap-3 pt-3">
+            <button
+              onclick="addToCart('${heroBook.id}')"
+              class="px-6 py-3.5 rounded-xl bg-emerald-800 hover:bg-emerald-700 text-white font-bold text-sm shadow-md transition flex items-center gap-2"
+            >
+              <span>أضف إلى السلة — $${heroBook.price.toFixed(2)}</span>
+              ${hasDiscount ? `<span class="line-through text-emerald-200/80 text-xs font-mono">$${heroBook.originalPrice.toFixed(2)}</span>` : ''}
+            </button>
+
+            <button
+              onclick="openReaderModal('${heroBook.id}')"
+              class="px-5 py-3.5 rounded-xl bg-white hover:bg-ivory-200 text-ink-900 border border-ivory-300 font-bold text-sm transition flex items-center gap-2"
+            >
+              <svg class="w-4 h-4 text-emerald-700" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+              <span>تصفح الكتاب (عينة مجانية)</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="lg:col-span-5 flex justify-center lg:justify-end">
+          <div class="relative book-card cursor-pointer" onclick="openReaderModal('${heroBook.id}')">
+            <div class="absolute -inset-6 bg-emerald-800/10 rounded-full blur-2xl"></div>
+            ${generateBookCoverHTML(heroBook, 'hero')}
+            <div class="mt-4 text-center">
+              <span class="inline-flex items-center gap-1.5 text-xs font-semibold text-ink-600 bg-white/90 px-3 py-1 rounded-full border border-ivory-300 shadow-2xs">
+                اضغط على الغلاف لقراءة عينة مجانية
+              </span>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderCategoryPills() {
+      const container = document.getElementById('category-pills');
+      container.innerHTML = CATEGORIES.map(cat => {
+        const active = state.selectedCategory === cat;
+        return `
+          <button
+            onclick="selectCategory('${cat}')"
+            class="px-4 py-2 rounded-full text-xs sm:text-sm font-semibold whitespace-nowrap transition ${
+              active
+                ? 'bg-ink-900 text-white shadow-xs'
+                : 'bg-white text-ink-700 border border-ivory-300 hover:bg-ivory-200'
+            }"
+          >
+            ${cat}
+          </button>
+        `;
+      }).join('');
+    }
+
+    function selectCategory(cat) {
+      state.selectedCategory = cat;
+      renderCategoryPills();
+      renderBookGrid();
+    }
+
+    function handleSearch(query) {
+      state.searchQuery = query.trim().toLowerCase();
+      document.getElementById('search-input').value = query;
+      document.getElementById('mobile-search-input').value = query;
+      renderBookGrid();
+    }
+
+    function handleSort(sortVal) {
+      state.sortBy = sortVal;
+      renderBookGrid();
+    }
+
+    function renderBookGrid() {
+      let filtered = books.filter(book => {
+        const matchesCat = state.selectedCategory === 'الكل' || book.category === state.selectedCategory;
+        const matchesSearch = !state.searchQuery ||
+          book.title.toLowerCase().includes(state.searchQuery) ||
+          book.author.toLowerCase().includes(state.searchQuery) ||
+          book.category.toLowerCase().includes(state.searchQuery) ||
+          book.description.toLowerCase().includes(state.searchQuery);
+        return matchesCat && matchesSearch;
+      });
+
+      if (state.sortBy === 'price-asc') {
+        filtered.sort((a, b) => a.price - b.price);
+      } else if (state.sortBy === 'price-desc') {
+        filtered.sort((a, b) => b.price - a.price);
+      } else if (state.sortBy === 'rating') {
+        filtered.sort((a, b) => b.rating - a.rating);
+      }
+
+      document.getElementById('catalog-count').textContent = `عرض ${filtered.length} ${filtered.length === 1 ? 'كتاب رقمي' : 'كتب رقمية'}`;
+
+      const grid = document.getElementById('book-grid');
+      if (filtered.length === 0) {
+        grid.innerHTML = `
+          <div class="col-span-full py-16 text-center bg-white rounded-2xl border border-ivory-300">
+            <p class="font-serif text-2xl font-bold text-ink-900">لم يتم العثور على كتب مطابقة</p>
+            <p class="text-sm text-ink-500 mt-1">جرّب مسح كلمات البحث أو تصفح جميع التصنيفات.</p>
+            <button onclick="selectCategory('الكل'); handleSearch('')" class="mt-4 px-4 py-2 rounded-lg bg-ink-900 text-white text-xs font-bold">إظهار جميع الكتب</button>
+          </div>
+        `;
+        return;
+      }
+
+      grid.innerHTML = filtered.map(book => {
+        const hasDiscount = book.originalPrice && book.originalPrice > book.price;
+        const discountPct = hasDiscount ? Math.round((1 - book.price / book.originalPrice) * 100) : 0;
+
+        return `
+          <article class="book-card bg-white rounded-2xl border border-ivory-300 p-6 flex flex-col justify-between shadow-2xs hover:shadow-md transition">
+            <div>
+              <!-- Top Category & Discount Badge -->
+              <div class="flex items-center justify-between gap-2 mb-5">
+                <span class="px-2.5 py-1 rounded-md bg-ivory-100 border border-ivory-300 text-[11px] font-bold text-ink-700">
+                  ${escapeHTML(book.category)}
+                </span>
+                ${hasDiscount ? `<span class="px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-700 text-[11px] font-bold">خصم ${discountPct}%</span>` : ''}
+              </div>
+
+              <!-- Centered 3D Book Cover -->
+              <div class="flex justify-center mb-6 cursor-pointer" onclick="openReaderModal('${book.id}')">
+                ${generateBookCoverHTML(book, 'card')}
+              </div>
+
+              <!-- Title, Author, Rating -->
+              <div class="space-y-1.5">
+                <div class="flex items-center gap-1.5 text-xs">
+                  <span class="text-amber-500 font-bold">★ ${book.rating.toFixed(1)}</span>
+                  <span class="text-ink-500">(${book.reviews})</span>
+                  <span class="text-ink-300">•</span>
+                  <span class="text-ink-500">${book.pages} صفحة</span>
+                </div>
+                <h3 class="font-serif text-2xl font-bold text-ink-900 leading-snug hover:text-emerald-800 cursor-pointer" onclick="openReaderModal('${book.id}')">
+                  ${escapeHTML(book.title)}
+                </h3>
+                <p class="text-xs font-semibold text-ink-600">تأليف: ${escapeHTML(book.author)}</p>
+                <p class="text-xs text-ink-500 line-clamp-2 pt-1 leading-relaxed">
+                  ${escapeHTML(book.description)}
+                </p>
+              </div>
+            </div>
+
+            <!-- Formats, Pricing & Action Buttons -->
+            <div class="pt-5 mt-5 border-t border-ivory-200 space-y-4">
+              <div class="flex items-center justify-between">
+                <div class="flex flex-wrap gap-1">
+                  ${book.formats.map(f => `<span class="px-2 py-0.5 rounded bg-ivory-100 text-ink-700 text-[10px] font-semibold border border-ivory-300">${escapeHTML(f)}</span>`).join('')}
+                </div>
+                <div class="text-left font-mono">
+                  ${hasDiscount ? `<span class="text-xs text-ink-400 line-through ml-1">$${book.originalPrice.toFixed(2)}</span>` : ''}
+                  <span class="text-lg font-bold text-ink-900">$${book.price.toFixed(2)}</span>
+                </div>
+              </div>
+
+              <div class="grid grid-cols-2 gap-2.5">
+                <button
+                  onclick="openReaderModal('${book.id}')"
+                  class="py-2.5 px-3 rounded-xl bg-ivory-100 hover:bg-ivory-200 text-ink-900 border border-ivory-300 text-xs font-bold transition flex items-center justify-center gap-1.5"
+                >
+                  <svg class="w-3.5 h-3.5 text-emerald-700" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                  تصفح الكتاب
+                </button>
+                <button
+                  onclick="addToCart('${book.id}')"
+                  class="py-2.5 px-3 rounded-xl bg-emerald-800 hover:bg-emerald-700 text-white text-xs font-bold shadow-2xs transition flex items-center justify-center gap-1.5"
+                >
+                  <span>+ أضف للسلة</span>
+                </button>
+              </div>
+            </div>
+          </article>
+        `;
+      }).join('');
+    }
+
+    // -----------------------------------------------------------------------
+    // 7. INTERACTIVE "LOOK INSIDE" SAMPLE READER
+    // -----------------------------------------------------------------------
+    function openReaderModal(bookId) {
+      const book = books.find(b => b.id === bookId);
+      if (!book) return;
+
+      state.readerBookId = bookId;
+      state.readerPage = 0;
+
+      document.getElementById('reader-book-title').textContent = book.title;
+      document.getElementById('reader-book-author').textContent = `تأليف: ${book.author} • ${book.formats.join(' / ')}`;
+      
+      const buyBtn = document.getElementById('reader-buy-btn');
+      buyBtn.innerHTML = `<span>أضف النسخة الكاملة للسلة — $${book.price.toFixed(2)}</span>`;
+      buyBtn.onclick = () => {
+        closeReaderModal();
+        addToCart(book.id);
+      };
+
+      renderReaderPage();
+      document.getElementById('reader-modal').classList.remove('hidden');
+    }
+
+    function closeReaderModal() {
+      document.getElementById('reader-modal').classList.add('hidden');
+    }
+
+    function renderReaderPage() {
+      const book = books.find(b => b.id === state.readerBookId);
+      if (!book) return;
+
+      const pages = book.samplePages && book.samplePages.length ? book.samplePages : [book.description];
+      const total = pages.length;
+      const currentText = pages[state.readerPage] || pages[0];
+
+      const paragraphs = currentText.split('\n\n').map((p, idx) => {
+        if (idx === 0) {
+          return `<h4 class="font-sans text-sm font-bold text-amber-600 mb-4">${escapeHTML(p)}</h4>`;
+        }
+        return `<p class="mb-5">${escapeHTML(p)}</p>`;
+      }).join('');
+
+      const contentEl = document.getElementById('reader-content');
+      contentEl.style.fontSize = `${state.readerFontSize}px`;
+      contentEl.innerHTML = `
+        ${paragraphs}
+        ${state.readerPage === total - 1 ? `
+          <div class="mt-10 p-6 rounded-2xl border border-amber-500/30 bg-amber-500/10 text-center font-sans">
+            <p class="text-sm font-bold mb-1">نهاية العينة المجانية</p>
+            <p class="text-xs opacity-80 mb-4">أضف الكتاب إلى سلتك وانسخ رابط السلة لإرساله إلينا عبر إنستغرام واستلام النسخة الكاملة (${book.pages} صفحة).</p>
+            <button onclick="closeReaderModal(); addToCart('${book.id}')" class="px-5 py-2.5 rounded-xl bg-emerald-800 text-white text-xs font-bold hover:bg-emerald-700 transition">
+              أضف "${escapeHTML(book.title)}" إلى السلة ($${book.price.toFixed(2)})
+            </button>
+          </div>
+        ` : ''}
+      `;
+
+      document.getElementById('reader-page-indicator').textContent = `صفحة ${state.readerPage + 1} من ${total}`;
+      document.getElementById('reader-prev-btn').disabled = state.readerPage === 0;
+      document.getElementById('reader-next-btn').disabled = state.readerPage >= total - 1;
+      document.getElementById('reader-body').scrollTop = 0;
+    }
+
+    function turnReaderPage(delta) {
+      const book = books.find(b => b.id === state.readerBookId);
+      if (!book) return;
+      const total = book.samplePages.length;
+      const next = state.readerPage + delta;
+      if (next >= 0 && next < total) {
+        state.readerPage = next;
+        renderReaderPage();
+      }
+    }
+
+    function setReaderTheme(theme) {
+      state.readerTheme = theme;
+      const container = document.getElementById('reader-container');
+      const header = document.getElementById('reader-header');
+      const footer = document.getElementById('reader-footer');
+
+      container.classList.remove('bg-ivory-50', 'text-ink-900', 'bg-[#F4ECD8]', 'text-[#433422]', 'bg-ink-900', 'text-ivory-100');
+      header.classList.remove('bg-white/80', 'bg-[#EAE0C8]', 'bg-ink-800');
+      footer.classList.remove('bg-white/80', 'bg-[#EAE0C8]', 'bg-ink-800');
+
+      if (theme === 'light') {
+        container.classList.add('bg-ivory-50', 'text-ink-900');
+        header.classList.add('bg-white/80');
+        footer.classList.add('bg-white/80');
+      } else if (theme === 'sepia') {
+        container.classList.add('bg-[#F4ECD8]', 'text-[#433422]');
+        header.classList.add('bg-[#EAE0C8]');
+        footer.classList.add('bg-[#EAE0C8]');
+      } else {
+        container.classList.add('bg-ink-900', 'text-ivory-100');
+        header.classList.add('bg-ink-800');
+        footer.classList.add('bg-ink-800');
+      }
+    }
+
+    function changeReaderFontSize(delta) {
+      state.readerFontSize = Math.min(24, Math.max(14, state.readerFontSize + delta));
+      document.getElementById('reader-content').style.fontSize = `${state.readerFontSize}px`;
+    }
+
+    // -----------------------------------------------------------------------
+    // 8. SHOPPING CART, SHAREABLE URL & INSTAGRAM DM WORKFLOW
+    // -----------------------------------------------------------------------
+    function toggleCartDrawer(open) {
+      const overlay = document.getElementById('cart-drawer-overlay');
+      if (open) {
+        overlay.classList.remove('hidden');
+        updateCartUI();
+      } else {
+        overlay.classList.add('hidden');
+      }
+    }
+
+    function addToCart(bookId) {
+      const book = books.find(b => b.id === bookId);
+      if (!book) return;
+
+      const existing = state.cart.find(item => item.bookId === bookId);
+      if (existing) {
+        showToast(`كتاب "${book.title}" موجود بالفعل في سلتك.`, 'info');
+        toggleCartDrawer(true);
+        return;
+      }
+
+      state.cart.push({ bookId: book.id });
+      updateCartUI();
+      showToast(`تمت إضافة "${book.title}" إلى السلة`, 'success');
+      toggleCartDrawer(true);
+    }
+
+    function removeFromCart(bookId) {
+      state.cart = state.cart.filter(item => item.bookId !== bookId);
+      updateCartUI();
+    }
+
+    function toggleOrderBump(checked) {
+      state.orderBump = checked;
+      updateCartUI();
+    }
+
+    function applyPromoCode() {
+      const input = document.getElementById('promo-code-input');
+      const feedback = document.getElementById('promo-feedback');
+      const code = input.value.trim().toUpperCase();
+
+      feedback.classList.remove('hidden', 'text-emerald-700', 'text-red-600');
+
+      if (!storeConfig.promoEnabled) {
+        feedback.textContent = 'أكواد الخصم متوقفة حالياً من قبل إدارة المتجر.';
+        feedback.classList.add('text-red-600');
+        return;
+      }
+
+      if (code === 'WELCOME20') {
+        state.promoApplied = true;
+        feedback.textContent = '✓ تم تفعيل كود WELCOME20: خصم 20% على إجمالي السلة!';
+        feedback.classList.add('text-emerald-700');
+        updateCartUI();
+      } else {
+        state.promoApplied = false;
+        feedback.textContent = 'كود غير صحيح. جرّب WELCOME20 للحصول على خصم 20%.';
+        feedback.classList.add('text-red-600');
+        updateCartUI();
+      }
+    }
+
+    function calculateCartTotals() {
+      let subtotal = state.cart.reduce((sum, item) => {
+        const b = books.find(bk => bk.id === item.bookId);
+        return sum + (b ? b.price : 0);
+      }, 0);
+
+      if (state.orderBump && state.cart.length > 0) {
+        subtotal += 9.00;
+      }
+
+      const discount = (state.promoApplied && storeConfig.promoEnabled) ? subtotal * 0.20 : 0;
+      const total = Math.max(0, subtotal - discount);
+
+      return { subtotal, discount, total };
+    }
+
+    function updateCartUI() {
+      const count = state.cart.length;
+      document.getElementById('cart-count-badge').textContent = count;
+      document.getElementById('drawer-cart-count').textContent = count;
+      updateCartCustomerStrip();
+
+      const container = document.getElementById('cart-items-container');
+      const footer = document.getElementById('cart-footer');
+
+      if (count === 0) {
+        footer.classList.add('hidden');
+        container.innerHTML = `
+          <div class="h-full flex flex-col items-center justify-center text-center py-12">
+            <div class="w-14 h-14 rounded-full bg-ivory-200 flex items-center justify-center text-ink-500 mb-3">
+              <svg class="w-7 h-7" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
+            </div>
+            <p class="font-serif text-xl font-bold text-ink-900">سلة القراءة فارغة حالياً</p>
+            <p class="text-xs text-ink-500 mt-1 max-w-xs">أضف الكتب التي ترغب بها، ثم انسخ رابط السلة وأرسله لحسابنا على إنستغرام لتثبيت طلبك.</p>
+            <button onclick="toggleCartDrawer(false)" class="mt-5 px-4 py-2 rounded-lg bg-ink-900 text-white text-xs font-bold">تصفح الكتب</button>
+          </div>
+        `;
+        return;
+      }
+
+      footer.classList.remove('hidden');
+
+      container.innerHTML = state.cart.map(item => {
+        const book = books.find(b => b.id === item.bookId);
+        if (!book) return '';
+        return `
+          <div class="flex items-start justify-between gap-3 p-3.5 rounded-xl bg-white border border-ivory-300 shadow-2xs">
+            <div class="space-y-1">
+              <h4 class="font-serif text-lg font-bold text-ink-900 leading-tight">${escapeHTML(book.title)}</h4>
+              <p class="text-xs text-ink-500">تأليف: ${escapeHTML(book.author)}</p>
+              <span class="inline-block px-2 py-0.5 rounded bg-emerald-50 text-emerald-800 text-[10px] font-bold">
+                الصيغ: ${escapeHTML(book.formats.join(' + '))}
+              </span>
+            </div>
+            <div class="text-left flex flex-col items-end justify-between h-full">
+              <span class="font-bold font-mono text-sm text-ink-900">$${book.price.toFixed(2)}</span>
+              <button onclick="removeFromCart('${book.id}')" class="text-[11px] text-red-600 hover:underline mt-3">حذف</button>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      const { subtotal, discount, total } = calculateCartTotals();
+      document.getElementById('cart-subtotal').textContent = `$${subtotal.toFixed(2)}`;
+      
+      const discountRow = document.getElementById('cart-discount-row');
+      if (discount > 0) {
+        discountRow.classList.remove('hidden');
+        document.getElementById('cart-discount').textContent = `-$${discount.toFixed(2)}`;
+      } else {
+        discountRow.classList.add('hidden');
+      }
+
+      document.getElementById('cart-total').textContent = `$${total.toFixed(2)}`;
+      document.getElementById('shareable-cart-url-input').value = buildShareableCartURL();
+    }
+
+    function generateFormattedOrderMessage() {
+      const shareUrl = buildShareableCartURL();
+      const { subtotal, discount, total } = calculateCartTotals();
+
+      const bookLines = state.cart.map((item, idx) => {
+        const b = books.find(bk => bk.id === item.bookId);
+        return b ? `${idx + 1}. ${b.title} ($${b.price.toFixed(2)})` : '';
+      }).filter(Boolean);
+
+      if (state.orderBump) {
+        bookLines.push(`${bookLines.length + 1}. دفتر العمل والملخصات التنفيذية ($9.00)`);
+      }
+
+      const customerBlock = customerUser
+        ? `الاسم: ${customerUser.name}\nحساب إنستغرام: @${customerUser.instagram.replace(/^@/, '')}\nالبريد الإلكتروني: ${customerUser.email}`
+        : `الاسم: زبون جديد`;
+
+      return [
+        `مرحباً، أرغب بتثبيت هذا الطلب من متجر FMSTORE 📚✨`,
+        `--------------------------`,
+        customerBlock,
+        `--------------------------`,
+        `الكتب المطلوبة:`,
+        ...bookLines,
+        discount > 0 ? `الخصم (WELCOME20): -$${discount.toFixed(2)}` : null,
+        `الإجمالي النهائي: $${total.toFixed(2)}`,
+        `--------------------------`,
+        `رابط السلة المباشر لتأكيد الطلب:`,
+        shareUrl
+      ].filter(Boolean).join('\n');
+    }
+
+    function copyTextToClipboardFallback(text) {
+      const textarea = document.createElement('textarea');
+      textarea.value = text;
+      textarea.style.position = 'fixed';
+      textarea.style.opacity = '0';
+      document.body.appendChild(textarea);
+      textarea.select();
+      try {
+        document.execCommand('copy');
+      } catch (e) {
+        console.error('Copy command failed', e);
+      }
+      document.body.removeChild(textarea);
+    }
+
+    function copyCartDetailsOnly() {
+      if (state.cart.length === 0) return;
+
+      if (storeConfig.requireLogin && !customerUser) {
+        toggleCartDrawer(false);
+        openLoginModal('copy');
+        showToast('يرجى تسجيل دخولك أولاً لتضمين بياناتك في رابط السلة.', 'info');
+        return;
+      }
+
+      const msg = generateFormattedOrderMessage();
+      copyTextToClipboardFallback(msg);
+      showToast('✓ تم نسخ تفاصيل الطلب ورابط السلة! يمكنك الآن لصقه في محادثة إنستغرام.', 'success');
+    }
+
+    function copyCartAndOpenInstagram() {
+      if (state.cart.length === 0) return;
+
+      if (storeConfig.requireLogin && !customerUser) {
+        toggleCartDrawer(false);
+        openLoginModal('instagram');
+        showToast('يرجى تسجيل دخولك أولاً لتضمين اسمك وحسابك في الطلب.', 'info');
+        return;
+      }
+
+      const msg = generateFormattedOrderMessage();
+      copyTextToClipboardFallback(msg);
+
+      const igHandle = (storeConfig.instagramUsername || 'fmstore').replace(/^@/, '');
+      const igDmUrl = `https://ig.me/m/${encodeURIComponent(igHandle)}`;
+
+      showToast(`✓ تم نسخ السلة! جاري فتح محادثة إنستغرام (@${igHandle}) — الصق الرسالة وأرسلها.`, 'success');
+
+      setTimeout(() => {
+        window.open(igDmUrl, '_blank', 'noopener,noreferrer');
+      }, 650);
+    }
+
+    // -----------------------------------------------------------------------
+    // 9. OWNER ADMIN DASHBOARD & LIVE CATALOG MANAGEMENT
+    // -----------------------------------------------------------------------
+    function syncAdminConfigInputs() {
+      const igInput = document.getElementById('admin-instagram-input');
+      const igPreview = document.getElementById('admin-instagram-preview');
+      const promoCheck = document.getElementById('setting-promo');
+      const loginCheck = document.getElementById('setting-require-login');
+
+      if (igInput) igInput.value = storeConfig.instagramUsername;
+      if (igPreview) igPreview.textContent = `https://ig.me/m/${storeConfig.instagramUsername}`;
+      if (promoCheck) promoCheck.checked = storeConfig.promoEnabled;
+      if (loginCheck) loginCheck.checked = storeConfig.requireLogin;
+    }
+
+    function saveInstagramUsername() {
+      const raw = document.getElementById('admin-instagram-input').value.trim().replace(/^@/, '');
+      if (!raw) {
+        showToast('يرجى إدخال اسم مستخدم صحيح لحساب إنستغرام.', 'info');
+        return;
+      }
+      storeConfig.instagramUsername = raw;
+      persistAll();
+      syncAdminConfigInputs();
+      showToast(`✓ تم تحديث حساب استقبال الطلبات إلى @${raw}`, 'success');
+    }
+
+    function renderAdminDashboard() {
+      syncAdminConfigInputs();
+
+      const totalUnits = books.reduce((sum, b) => sum + (b.soldCount || 0), 0);
+      const totalRevenue = books.reduce((sum, b) => sum + ((b.soldCount || 0) * b.price), 0);
+
+      document.getElementById('admin-kpi-grid').innerHTML = `
+        <div class="bg-white rounded-2xl border border-ivory-300 p-5 shadow-2xs">
+          <span class="text-xs font-bold text-ink-500">إجمالي المبيعات التقديرية</span>
+          <p class="font-mono text-3xl font-bold text-ink-900 mt-1">$${totalRevenue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+          <span class="text-xs text-emerald-700 font-semibold mt-1 inline-block">↑ 100% صافي للمتجر</span>
+        </div>
+        <div class="bg-white rounded-2xl border border-ivory-300 p-5 shadow-2xs">
+          <span class="text-xs font-bold text-ink-500">النسخ الرقمية المباعة</span>
+          <p class="font-mono text-3xl font-bold text-ink-900 mt-1">${totalUnits.toLocaleString()}</p>
+          <span class="text-xs text-ink-500 mt-1 inline-block">عبر ${books.length} كتب منشورة</span>
+        </div>
+        <div class="bg-white rounded-2xl border border-ivory-300 p-5 shadow-2xs">
+          <span class="text-xs font-bold text-ink-500">الطلبات المثبتة (إنستغرام)</span>
+          <p class="font-mono text-3xl font-bold text-ink-900 mt-1">${orders.length}</p>
+          <span class="text-xs text-emerald-700 font-semibold mt-1 inline-block">✓ عبر روابط السلة المباشرة</span>
+        </div>
+        <div class="bg-white rounded-2xl border border-ivory-300 p-5 shadow-2xs">
+          <span class="text-xs font-bold text-ink-500">حساب الاستقبال النشط</span>
+          <p class="font-mono text-xl font-bold text-emerald-800 mt-2 truncate" dir="ltr">@${escapeHTML(storeConfig.instagramUsername)}</p>
+          <span class="text-xs text-amber-600 font-semibold mt-1 inline-block">مربوط بزر السلة</span>
+        </div>
+      `;
+
+      // 7-Day CSS Bar Chart
+      const dailySales = [420, 590, 480, 740, 680, 910, 1150];
+      const maxSale = Math.max(...dailySales);
+      document.getElementById('admin-sales-chart').innerHTML = dailySales.map((val, idx) => {
+        const heightPct = Math.round((val / maxSale) * 100);
+        const isToday = idx === dailySales.length - 1;
+        return `
+          <div class="flex-1 flex flex-col items-center gap-2 group h-full justify-end">
+            <span class="text-[11px] font-mono font-bold text-ink-700 opacity-80 group-hover:opacity-100">$${val}</span>
+            <div
+              style="height: ${heightPct}%"
+              class="w-full max-w-[44px] rounded-t-lg transition-all duration-300 ${isToday ? 'bg-emerald-700' : 'bg-ink-800/85 group-hover:bg-emerald-600'}"
+            ></div>
+          </div>
+        `;
+      }).join('');
+
+      // Inventory & Pricing Table
+      document.getElementById('admin-inventory-tbody').innerHTML = books.map(book => {
+        const hasDiscount = book.originalPrice && book.originalPrice > book.price;
+        return `
+          <tr class="hover:bg-ivory-50 transition">
+            <td class="py-4 px-6">
+              <div class="font-bold text-ink-900">${escapeHTML(book.title)}</div>
+              <div class="text-xs text-ink-500">${escapeHTML(book.author)}</div>
+            </td>
+            <td class="py-4 px-4">
+              <span class="px-2.5 py-1 rounded-md bg-ivory-100 border border-ivory-300 text-xs font-semibold text-ink-700">${escapeHTML(book.category)}</span>
+            </td>
+            <td class="py-4 px-4">
+              <div class="flex flex-wrap gap-1">
+                ${book.formats.map(f => `<span class="px-1.5 py-0.5 rounded bg-ivory-200 text-[11px] font-semibold text-ink-800">${escapeHTML(f)}</span>`).join('')}
+              </div>
+            </td>
+            <td class="py-4 px-4">
+              <div class="flex items-center gap-2">
+                <span class="font-mono font-bold text-ink-900">$${book.price.toFixed(2)}</span>
+                ${hasDiscount ? `<span class="text-xs line-through text-ink-400 font-mono">$${book.originalPrice.toFixed(2)}</span>` : ''}
+                <button
+                  onclick="quickAdjustPrice('${book.id}', -2)"
+                  title="تخفيض السعر 2$"
+                  class="px-2 py-0.5 rounded bg-ivory-200 hover:bg-ivory-300 text-xs font-bold font-mono"
+                >-2</button>
+                <button
+                  onclick="quickAdjustPrice('${book.id}', 2)"
+                  title="زيادة السعر 2$"
+                  class="px-2 py-0.5 rounded bg-ivory-200 hover:bg-ivory-300 text-xs font-bold font-mono"
+                >+2</button>
+              </div>
+            </td>
+            <td class="py-4 px-4 font-mono text-ink-700">${book.soldCount.toLocaleString()}</td>
+            <td class="py-4 px-6 text-left space-x-2 space-x-reverse">
+              <button onclick="openBookEditorModal('${book.id}')" class="px-3 py-1.5 rounded-lg border border-ivory-300 hover:bg-ivory-200 text-xs font-bold text-ink-800">تعديل</button>
+              <button onclick="deleteBook('${book.id}')" class="px-3 py-1.5 rounded-lg border border-red-200 hover:bg-red-50 text-xs font-bold text-red-600">حذف</button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+
+      // Orders Ledger
+      document.getElementById('admin-orders-tbody').innerHTML = orders.map(ord => `
+        <tr class="hover:bg-ivory-50">
+          <td class="py-3.5 px-6 font-mono font-bold text-ink-900">${escapeHTML(ord.id)}</td>
+          <td class="py-3.5 px-4">
+            <div class="font-bold text-ink-900">${escapeHTML(ord.customerName)}</div>
+            <div class="text-xs font-mono text-emerald-800" dir="ltr">${escapeHTML(ord.instagram)}</div>
+          </td>
+          <td class="py-3.5 px-4 text-ink-800 font-semibold">${escapeHTML(ord.items.join('، '))}</td>
+          <td class="py-3.5 px-4 font-mono font-bold text-ink-900">$${ord.total.toFixed(2)}</td>
+          <td class="py-3.5 px-6">
+            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-800 text-xs font-bold">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>
+              ${escapeHTML(ord.status)}
+            </span>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function quickAdjustPrice(bookId, delta) {
+      const book = books.find(b => b.id === bookId);
+      if (!book) return;
+      book.price = Math.max(1, Number((book.price + delta).toFixed(2)));
+      persistAll();
+      renderAdminDashboard();
+      renderHeroFeatured();
+      renderBookGrid();
+      updateCartUI();
+      showToast(`تم تحديث سعر "${book.title}" إلى $${book.price.toFixed(2)}`, 'success');
+    }
+
+    function toggleStoreSetting(key, val) {
+      storeConfig[key] = val;
+      persistAll();
+      updateCartUI();
+      showToast('تم تحديث إعدادات المتجر بنجاح', 'info');
+    }
+
+    function openBookEditorModal(bookId = null) {
+      const modal = document.getElementById('book-editor-modal');
+      const titleEl = document.getElementById('editor-modal-title');
+
+      if (bookId) {
+        const book = books.find(b => b.id === bookId);
+        if (!book) return;
+        titleEl.textContent = 'تعديل بيانات الكتاب والسعر';
+        document.getElementById('edit-book-id').value = book.id;
+        document.getElementById('edit-book-title').value = book.title;
+        document.getElementById('edit-book-author').value = book.author;
+        document.getElementById('edit-book-category').value = book.category;
+        document.getElementById('edit-book-price').value = book.price;
+        document.getElementById('edit-book-original-price').value = book.originalPrice || '';
+        document.getElementById('edit-book-theme').value = book.theme;
+        document.getElementById('edit-book-desc').value = book.description;
+        document.getElementById('edit-book-sample').value = (book.samplePages && book.samplePages[0]) || '';
+        document.getElementById('fmt-epub').checked = book.formats.includes('EPUB');
+        document.getElementById('fmt-pdf').checked = book.formats.includes('PDF');
+        document.getElementById('fmt-audio').checked = book.formats.includes('صوتي');
+      } else {
+        titleEl.textContent = 'نشر كتاب رقمي جديد';
+        document.getElementById('edit-book-id').value = '';
+        document.getElementById('edit-book-title').value = '';
+        document.getElementById('edit-book-author').value = '';
+        document.getElementById('edit-book-category').value = 'التقنية والذكاء الاصطناعي';
+        document.getElementById('edit-book-price').value = '19.00';
+        document.getElementById('edit-book-original-price').value = '25.00';
+        document.getElementById('edit-book-theme').value = 'emerald';
+        document.getElementById('edit-book-desc').value = '';
+        document.getElementById('edit-book-sample').value = '';
+        document.getElementById('fmt-epub').checked = true;
+        document.getElementById('fmt-pdf').checked = true;
+        document.getElementById('fmt-audio').checked = false;
+      }
+
+      modal.classList.remove('hidden');
+    }
+
+    function closeBookEditorModal() {
+      document.getElementById('book-editor-modal').classList.add('hidden');
+    }
+
+    function saveBookFromAdmin(event) {
+      event.preventDefault();
+      const id = document.getElementById('edit-book-id').value;
+      const title = document.getElementById('edit-book-title').value.trim();
+      const author = document.getElementById('edit-book-author').value.trim();
+      const category = document.getElementById('edit-book-category').value;
+      const price = parseFloat(document.getElementById('edit-book-price').value) || 15.00;
+      const origRaw = parseFloat(document.getElementById('edit-book-original-price').value);
+      const originalPrice = (!isNaN(origRaw) && origRaw > price) ? origRaw : null;
+      const theme = document.getElementById('edit-book-theme').value;
+      const description = document.getElementById('edit-book-desc').value.trim();
+      const sampleText = document.getElementById('edit-book-sample').value.trim() || description;
+
+      const formats = [];
+      if (document.getElementById('fmt-epub').checked) formats.push('EPUB');
+      if (document.getElementById('fmt-pdf').checked) formats.push('PDF');
+      if (document.getElementById('fmt-audio').checked) formats.push('صوتي');
+      if (formats.length === 0) formats.push('EPUB');
+
+      if (id) {
+        const existing = books.find(b => b.id === id);
+        if (existing) {
+          Object.assign(existing, {
+            title, author, category, price, originalPrice, theme, description, formats,
+            samplePages: [sampleText, ...(existing.samplePages.slice(1))]
+          });
+        }
+        showToast(`تم حفظ التعديلات على "${title}"`, 'success');
+      } else {
+        books.unshift({
+          id: `bk-${Date.now()}`,
+          title,
+          subtitle: 'إصدار رقمي جديد',
+          author,
+          category,
+          price,
+          originalPrice,
+          rating: 5.0,
+          reviews: 1,
+          pages: 240,
+          formats,
+          theme,
+          featured: false,
+          soldCount: 0,
+          description,
+          samplePages: [sampleText]
+        });
+        showToast(`تم نشر كتاب "${title}" في المتجر بنجاح!`, 'success');
+      }
+
+      persistAll();
+      closeBookEditorModal();
+      renderAdminDashboard();
+      renderHeroFeatured();
+      renderBookGrid();
+      updateCartUI();
+    }
+
+    function deleteBook(bookId) {
+      if (books.length <= 1) {
+        showToast('لا يمكن حذف آخر كتاب متبقٍ في المتجر.', 'info');
+        return;
+      }
+      const target = books.find(b => b.id === bookId);
+      books = books.filter(b => b.id !== bookId);
+      state.cart = state.cart.filter(item => item.bookId !== bookId);
+      persistAll();
+      updateCartUI();
+      renderAdminDashboard();
+      renderHeroFeatured();
+      renderBookGrid();
+      showToast(`تم حذف "${target ? target.title : 'الكتاب'}" من القائمة`, 'info');
+    }
+
+    // -----------------------------------------------------------------------
+    // 10. EXPORT UPDATED SELF-CONTAINED HTML FILE (تصدير نسخة الموقع المحدّثة)
+    // -----------------------------------------------------------------------
+    function exportUpdatedStoreHTML() {
+      try {
+        // Ensure at least one book is marked featured if books exist
+        if (books.length > 0 && !books.some(b => b.featured)) {
+          books[0].featured = true;
+        }
+
+        // Capture the full current HTML document source
+        let fullHTML = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
+
+        // Replace DEFAULT_BOOKS block with the owner's live books catalog
+        const serializedBooks = JSON.stringify(books, null, 6);
+        fullHTML = fullHTML.replace(
+          /\/\* DEFAULT_BOOKS_START \*\/[\s\S]*?\/\* DEFAULT_BOOKS_END \*\//,
+          `/* DEFAULT_BOOKS_START */\n    const DEFAULT_BOOKS = ${serializedBooks};\n    /* DEFAULT_BOOKS_END */`
+        );
+
+        // Replace DEFAULT_STORE_CONFIG block with the owner's live settings
+        const serializedConfig = JSON.stringify(storeConfig, null, 6);
+        fullHTML = fullHTML.replace(
+          /\/\* DEFAULT_CONFIG_START \*\/[\s\S]*?\/\* DEFAULT_CONFIG_END \*\//,
+          `/* DEFAULT_CONFIG_START */\n    const DEFAULT_STORE_CONFIG = ${serializedConfig};\n    /* DEFAULT_CONFIG_END */`
+        );
+
+        // Trigger automatic file download of index.html
+        const blob = new Blob([fullHTML], { type: 'text/html;charset=utf-8' });
+        const downloadUrl = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = downloadUrl;
+        link.download = 'index.html';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(downloadUrl);
+
+        showToast('✓ تم تحميل ملف index.html المحدّث! ارفعه إلى استضافتك ليظهر للزبائن فوراً.', 'success');
+      } catch (err) {
+        console.error('Export failed:', err);
+        showToast('حدث خطأ أثناء تصدير الملف، يرجى المحاولة مرة أخرى.', 'info');
+      }
+    }
+
+    // -----------------------------------------------------------------------
+    // 11. UTILITIES & TOAST NOTIFICATIONS
+    // -----------------------------------------------------------------------
+    function escapeHTML(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    function showToast(message, type = 'success') {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      const bgClass = type === 'success' ? 'bg-ink-900 border-emerald-500' : 'bg-ink-800 border-amber-400';
+
+      toast.className = `${bgClass} text-white border-r-4 px-4 py-3 rounded-xl shadow-xl text-xs font-semibold flex items-center gap-2.5 animate-fade-in pointer-events-auto max-w-sm`;
+      toast.innerHTML = `
+        <span class="text-emerald-400 font-bold text-sm">${type === 'success' ? '✓' : '•'}</span>
+        <span>${escapeHTML(message)}</span>
+      `;
+      container.appendChild(toast);
+
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transition = 'opacity 0.25s ease';
+        setTimeout(() => toast.remove(), 250);
+      }, 3600);
+    }
+  </script>
+</body>
+</html>
